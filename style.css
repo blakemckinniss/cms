@@ -1,0 +1,674 @@
+/* Root Variables & Basic Body Styles - VS Code Slate Theme */
+:root {
+    /* Core Theme Colors (Inspired by VS Code Default Dark) */
+    --bg-color: #231f20;         /* Editor background */
+    --sidebar-bg: #333333;     /* Activity bar / Darker sidebar areas */
+    --input-bg: #3c3c3c;         /* Input background, slightly lighter */
+    --text-color: #cccccc;       /* Default text */
+    --text-secondary-color: #9e9e9e; /* Dimmer text */
+    --primary-color: #a6192e;     /* VS Code blue accent */
+    --primary-hover-color: #c0394f; /* Lighter blue for hover */
+    --border-color: #444444;     /* Borders */
+    --hover-bg: #404040;         /* Subtle hover background */
+    --error-bg: #5a1d1d;         /* Dark red background */
+    --error-text: #f48771;       /* Lighter red text */
+    --info-bg: #3a3d41;          /* Info background (used for AI messages) */
+    --info-text: var(--text-color); /* Info text */
+    --success-color: #28a745;    /* Green for success/glow */
+
+    --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+    /* Bootstrap Variable Overrides for VS Code Slate Theme */
+    /* Add !important to core overrides */
+    --bs-body-color: var(--text-color) !important;
+    --bs-body-bg: var(--bg-color) !important;
+    --bs-secondary-bg: var(--sidebar-bg) !important; /* Used for cards, modals, sidebars etc. */
+    --bs-border-color: var(--border-color) !important;
+    --bs-success: var(--success-color); /* Map success color */
+
+    --bs-tertiary-bg: var(--input-bg); /* Used for some component backgrounds */
+    --bs-emphasis-color: var(--text-color);
+    --bs-secondary-color: var(--text-secondary-color);
+    --bs-primary: var(--primary-color);
+    --bs-primary-rgb: 166, 25, 46;
+    --bs-link-color: var(--primary-color);
+    --bs-link-hover-color: var(--primary-hover-color);
+    --bs-code-color: #ce9178; /* VS Code orange-ish for code */
+    --bs-form-control-bg: var(--input-bg);
+    --bs-form-control-color: var(--text-color);
+    --bs-form-select-bg: var(--input-bg);
+    --bs-form-select-color: var(--text-color);
+    --bs-form-select-indicator-color: var(--text-color);
+    --bs-input-group-addon-bg: var(--sidebar-bg);
+    --bs-input-group-addon-color: var(--text-color);
+    --bs-modal-bg: var(--sidebar-bg);
+    --bs-modal-header-border-color: var(--border-color);
+    --bs-modal-footer-border-color: var(--border-color);
+    --bs-alert-color: inherit; /* Use specific alert colors below */
+    --bs-alert-bg: inherit;
+    --bs-alert-border-color: inherit;
+    --bs-alert-link-color: inherit;
+    --bs-alert-info-bg: var(--info-bg);
+    --bs-alert-info-text: var(--info-text);
+    --bs-alert-info-border-color: var(--border-color); /* Subtle border */
+    --bs-alert-danger-bg: var(--error-bg);
+    --bs-alert-danger-text: var(--error-text);
+    --bs-alert-danger-border-color: var(--error-text);
+    --bs-btn-color: #ffffff; /* White text on primary blue */
+    --bs-btn-bg: var(--primary-color);
+    --bs-btn-border-color: var(--primary-color);
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-bg: var(--primary-hover-color);
+    --bs-btn-hover-border-color: var(--primary-hover-color);
+    --bs-btn-active-color: #ffffff;
+    --bs-btn-active-bg: var(--primary-hover-color);
+    --bs-btn-active-border-color: var(--primary-hover-color);
+    --bs-btn-disabled-color: #aaaaaa;
+    --bs-btn-disabled-bg: #555555;
+    --bs-btn-disabled-border-color: #555555;
+    --bs-btn-outline-secondary-color: var(--text-secondary-color);
+    --bs-btn-outline-secondary-border-color: var(--border-color);
+    --bs-btn-outline-secondary-hover-color: var(--text-color);
+    --bs-btn-outline-secondary-hover-bg: var(--hover-bg);
+    --bs-btn-outline-secondary-hover-border-color: #666666;
+    --bs-form-check-input-bg: var(--input-bg);
+    --bs-form-check-input-border: 1px solid var(--border-color);
+    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255, 255, 255, 0.25%29'/%3e%3c/svg%3e"); /* White circle for dark bg */
+    --bs-form-switch-checked-bg: var(--primary-color);
+    --bs-form-switch-checked-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+body {
+    font-family: var(--font-family);
+    /* overflow: hidden; REMOVED - Allow body scroll */
+    font-size: 14px; /* Slightly smaller base font size */
+    background-color: var(--bs-body-bg); /* Use BS variable */
+    color: var(--bs-body-color); /* Use BS variable */
+}
+
+
+/* Ensure container is flex column and takes full height */
+.container-fluid.vh-100 {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+/* Ensure row grows within the flex container */
+.row.flex-grow-1 {
+    flex-grow: 1; /* Make row fill vertical space */
+}
+/* Make columns flex containers to allow content stretching */
+.row.flex-grow-1 > [class*="col-"] {
+    display: flex;
+    flex-direction: column;
+}
+.sidebar, .main-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Sidebar specific styles */
+.sidebar {
+    height: 100vh; /* Full height FOR DESKTOP */
+    overflow-y: auto; /* Enable scroll if content overflows */
+    background-color: var(--bs-secondary-bg); /* Use BS variable */
+    /* Custom scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: var(--bs-border-color) var(--bs-secondary-bg);
+}
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: var(--bs-secondary-bg);
+  border-radius: 4px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--bs-border-color);
+  border-radius: 4px;
+  border: 2px solid var(--bs-secondary-bg);
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+.left-sidebar {
+    border-right: 1px solid var(--bs-border-color); /* DESKTOP border */
+}
+
+.right-sidebar {
+    border-left: 1px solid var(--bs-border-color); /* DESKTOP border */
+}
+
+.right-sidebar h2 {
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--bs-border-color);
+    flex-shrink: 0; /* Prevent shrinking */
+    font-weight: 500;
+}
+
+#settings-form {
+    /* Custom scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: var(--bs-border-color) var(--bs-secondary-bg);
+}
+#settings-form::-webkit-scrollbar {
+  width: 8px;
+}
+#settings-form::-webkit-scrollbar-track {
+  background: var(--bs-secondary-bg);
+  border-radius: 4px;
+}
+#settings-form::-webkit-scrollbar-thumb {
+  background-color: var(--bs-border-color);
+  border-radius: 4px;
+  border: 2px solid var(--bs-secondary-bg);
+}
+#settings-form::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+
+/* Main Content (Chat) */
+.main-content {
+    position: relative; /* Needed for absolute positioning of child */
+    background-color: var(--bs-body-bg); /* Ensure main area bg */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Ensure main content fills its column */
+}
+
+.chat-display {
+    flex-grow: 1; /* Allow chat display to take available space */
+    overflow-y: auto; /* Enable vertical scrolling */
+    height: 0; /* Necessary for flex-grow to work correctly with overflow FOR DESKTOP */
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Spacing between messages */
+    padding: 45px 15px 15px 15px; /* Adjust padding (top for button, L/R/B for spacing/scrollbar) */
+    /* Custom scrollbar styling for chat display */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) var(--bg-color); /* Thumb color, Track color */
+}
+.chat-display::-webkit-scrollbar {
+  width: 8px;
+}
+.chat-display::-webkit-scrollbar-track {
+  background: var(--bg-color); /* Match main background */
+  border-radius: 4px;
+}
+.chat-display::-webkit-scrollbar-thumb {
+  background-color: var(--border-color); /* Use border color for thumb */
+  border-radius: 4px;
+  border: 2px solid var(--bg-color); /* Match track background */
+}
+.chat-display::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Slightly lighter on hover */
+}
+
+
+.message {
+    padding: 10px 15px;
+    border-radius: 6px; /* Slightly less rounded */
+    max-width: 85%;
+    line-height: 1.5;
+    word-wrap: break-word;
+    white-space: pre-wrap; /* Preserve line breaks from AI */
+}
+
+
+/* Copy Button Styling */
+.message.ai {
+    position: relative; /* Needed for absolute positioning of copy button */
+    padding-right: 35px; /* Make space for the button */
+    /* Ensure alert styles apply */
+    background-color: var(--bs-alert-info-bg);
+    color: var(--bs-alert-info-text);
+    border: 1px solid var(--bs-alert-info-border-color);
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+}
+.message.ai.alert-danger { /* Error messages */
+     background-color: var(--bs-alert-danger-bg);
+     color: var(--bs-alert-danger-text);
+     border-color: var(--bs-alert-danger-border-color);
+}
+
+.copy-msg-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    padding: 0.1rem 0.3rem;
+    line-height: 1;
+    background-color: rgba(var(--bs-secondary-rgb), 0.2); /* Subtle background */
+    border: 1px solid rgba(var(--bs-border-color-translucent), 0.3);
+    color: var(--bs-secondary-color);
+    border-radius: 0.2rem;
+    opacity: 0.5;
+    transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    z-index: 5;
+}
+
+.copy-msg-btn:hover {
+    opacity: 1;
+    background-color: rgba(var(--bs-secondary-rgb), 0.4);
+    color: var(--bs-body-color);
+}
+
+.copy-msg-btn.copied {
+    color: var(--bs-success); /* Use Bootstrap success color */
+    opacity: 1;
+}
+
+.copy-msg-btn svg {
+    vertical-align: middle;
+}
+
+
+.message.user {
+    background-color: var(--primary-color);
+    color: #ffffff; /* White text on primary color */
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+
+/* AI messages use Bootstrap alert styles now, defined in :root */
+/* .message.ai { (Merged above) } */
+/* .message.ai.alert-danger { (Merged above) } */
+
+
+.message.ai strong { /* For highlighting parts of AI response */
+    color: var(--primary-color); /* Use primary accent for emphasis */
+    font-weight: 600;
+}
+
+#user-input {
+    max-height: 150px; /* Limit growth */
+    resize: none; /* Disable manual resize */
+    overflow-y: auto; /* Add scroll if max-height reached */
+}
+
+#send-button svg {
+    fill: #ffffff; /* Ensure SVG fill matches button text color */
+}
+#send-button:disabled svg {
+    fill: #aaaaaa;
+}
+
+/* Top Right Clear Button */
+.top-right-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10; /* Ensure it's above chat content */
+}
+
+/* File Input Styles */
+.file-status {
+    margin-top: 5px;
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: block; /* Ensure it takes block space */
+    color: var(--text-secondary-color); /* Use secondary text color */
+}
+.file-status.loaded {
+    font-style: normal;
+    color: var(--text-color); /* Use normal text color when loaded */
+}
+.file-status.error {
+    font-style: normal;
+    color: var(--error-text); /* Use error text color */
+    background-color: var(--error-bg); /* Subtle error background */
+    padding: 2px 4px;
+    border-radius: 3px;
+    display: inline-block; /* Prevent full width */
+}
+
+/* API Key Modal Error Message */
+#modal-error-message.alert-danger {
+    /* Uses Bootstrap variables defined in :root */
+    color: var(--bs-alert-danger-text);
+    background-color: var(--bs-alert-danger-bg);
+    border-color: var(--bs-alert-danger-border-color);
+}
+
+/* Ensure modal doesn't have extra padding from old styles */
+.modal-content {
+    padding: 0; /* Bootstrap handles padding in header/body/footer */
+    background-color: var(--bs-modal-bg); /* Explicitly set modal background */
+    border: 1px solid var(--bs-border-color); /* Ensure border uses variable */
+}
+
+/* Adjustments for Bootstrap components */
+.form-select-sm, .form-control-sm {
+    font-size: 0.875rem; /* Match sm input size */
+}
+
+.input-group .btn {
+    /* Ensure button aligns nicely with textarea */
+    height: auto; /* Let Bootstrap handle height */
+}
+
+/* Remove focus outline if using Bootstrap's focus ring */
+*:focus {
+    outline: none;
+}
+
+/* Ensure Bootstrap focus ring uses primary color */
+.form-control:focus, .form-select:focus, .btn:focus {
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.35); /* Slightly more visible focus */
+  border-color: var(--primary-color) !important; /* Ensure border color changes too, use !important if needed */
+}
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.35);
+  border-color: var(--primary-color) !important; /* Ensure border color changes too, use !important if needed */
+}
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Custom styling for the "Generating..." message */
+.alert[role="status"] {
+    background-color: var(--bs-tertiary-bg); /* Use input background */
+    color: var(--bs-secondary-color); /* Use secondary text color */
+    border-color: var(--bs-border-color);
+}
+
+
+/* Force primary button color */
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important; /* Ensure text remains white */
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--primary-hover-color) !important;
+    border-color: var(--primary-hover-color) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.5) !important; /* Adjust focus shadow if needed */
+}
+
+/* --- Specific Overrides (Place at the end) --- */
+
+/* Ensure sidebar background color overrides .bg-light */
+.sidebar.bg-light {
+    background-color: var(--bs-secondary-bg) !important;
+}
+
+/* Ensure chat input area background and prevent shrinking */
+.chat-input-area { /* General selector for input area */
+    flex-shrink: 0; /* Prevent input area from shrinking */
+}
+.chat-input-area.bg-light { /* Specific background override */
+     background-color: var(--bs-secondary-bg) !important;
+     border-top: 1px solid var(--bs-border-color) !important;
+}
+
+/* Ensure modal header/footer background */
+.modal-header, .modal-footer {
+    background-color: var(--bs-modal-bg); /* Use modal bg variable */
+    border-color: var(--bs-border-color); /* Use border variable */
+}
+.modal-header {
+    border-bottom: 1px solid var(--bs-border-color);
+}
+.modal-footer {
+    border-top: 1px solid var(--bs-border-color);
+}
+
+/* Ensure form labels use correct color */
+label, .form-label, .form-check-label {
+    color: var(--bs-body-color);
+}
+
+
+/* Styles for input wrappers and clear buttons */
+.input-wrapper {
+    /* This class is now only used for the switch */
+    position: relative;
+}
+
+/* General style for clear buttons (used by JS selector) */
+.clear-input-btn {
+    opacity: 0.6; /* Slightly more visible by default */
+    transition: opacity 0.2s ease-in-out;
+    /* Use Bootstrap button padding/sizing via btn-sm */
+    /* Ensure vertical alignment if needed */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* Make the 'x' slightly bolder */
+    font-weight: 500;
+}
+
+/* Style for buttons within input groups */
+.input-group > .clear-input-btn.btn-outline-secondary {
+    /* Bootstrap handles most styling here */
+    /* Override border if needed, but outline-secondary should work */
+    border-left: 0; /* Remove left border added by input-group */
+    font-size: 1rem; /* Adjust size of 'x' if needed */
+    padding: 0 0.5rem; /* Adjust padding */
+    /* Ensure it doesn't get focus ring */
+    box-shadow: none !important;
+}
+
+.input-group {
+    padding-left: 5px;
+}
+
+.clear-input-btn:hover,
+.clear-input-btn:focus {
+    opacity: 1; /* Fully visible on hover/focus */
+    box-shadow: none !important; /* Remove Bootstrap focus shadow */
+}
+
+/* Specific adjustment for the switch clear button (still absolute) */
+.clear-switch-btn {
+    position: absolute;
+    top: 5px; /* Align differently for switches */
+    right: -5px; /* Adjust horizontal position */
+    padding: 0.1rem 0.3rem; /* Smaller padding for btn-close */
+    line-height: 1;
+    font-size: 0.7rem; /* Smaller font size for the 'x' */
+    background-color: transparent;
+    border: none;
+    z-index: 5; /* Ensure it's above the input */
+    /* Inherit opacity/transition from .clear-input-btn */
+}
+
+/* Hide clear button if input is empty/default (handled by JS potentially, but good fallback) */
+/* Example: input:placeholder-shown + .clear-input-btn { display: none; } */
+
+
+/* Hide number input spinners (arrows) */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type='number'] {
+    -moz-appearance: textfield; /* Firefox */
+}
+
+/* File Input Customization */
+.file-group {
+    position: relative;
+    /* Adjust margin/padding as needed */
+}
+
+/* Hide the default file input visually */
+.file-group input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Style the custom label button */
+.file-input-label-button {
+    display: inline-block;
+    padding: 0.25rem 0.5rem; /* Smaller padding */
+    font-size: 0.875rem; /* Match sm button size */
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-btn-outline-secondary-color);
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid var(--bs-btn-outline-secondary-border-color);
+    border-radius: 0.25rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    margin-bottom: 4px; /* Space between button and status */
+}
+
+.file-input-label-button:hover {
+    color: var(--bs-btn-outline-secondary-hover-color);
+    background-color: var(--bs-btn-outline-secondary-hover-bg);
+    border-color: var(--bs-btn-outline-secondary-hover-border-color);
+}
+
+/* Ensure the label text is not italic */
+.file-group .form-label {
+    font-style: normal;
+    margin-bottom: 0.25rem; /* Reduce space below label */
+}
+
+/* Mode Specific Visibility */
+.sms-only,
+.email-only {
+    display: none; /* Hide by default */
+}
+
+body.mode-sms-active .sms-only {
+    display: block; /* Show SMS elements when SMS mode is active */
+}
+/* Handle inline elements like spans correctly */
+body.mode-sms-active .sms-only[style*="display: inline"],
+body.mode-sms-active .sms-only.d-inline,
+body.mode-sms-active .sms-only.d-inline-block {
+    display: inline-block; /* Or inline, depending on original style */
+}
+
+
+body.mode-email-active .email-only {
+    display: block; /* Show Email elements when Email mode is active */
+}
+/* Handle inline elements like spans correctly */
+body.mode-email-active .email-only[style*="display: inline"],
+body.mode-email-active .email-only.d-inline,
+body.mode-email-active .email-only.d-inline-block {
+    display: inline-block; /* Or inline, depending on original style */
+}
+
+/* Ensure hr elements are displayed correctly */
+body.mode-sms-active hr.sms-only,
+body.mode-email-active hr.email-only {
+    display: block;
+}
+
+/* Glow effect for active/non-default settings */
+.input-active-glow {
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-success-rgb), 0.4); /* Green glow */
+    border-color: var(--bs-success) !important; /* Green border */
+}
+/* Ensure focus style overrides glow */
+.input-active-glow:focus {
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.35) !important; /* Primary focus */
+    border-color: var(--primary-color) !important;
+}
+
+/* Style for <pre> tags inside AI messages (for email body) */
+.message.ai pre.email-body {
+    background-color: rgba(0, 0, 0, 0.1); /* Slightly darker background */
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: var(--bs-font-monospace); /* Use monospace font */
+    font-size: 0.9em; /* Slightly smaller font */
+    color: inherit; /* Inherit color from parent */
+    white-space: pre-wrap; /* Ensure wrapping */
+    word-wrap: break-word;
+    margin-top: 5px;
+    border: 1px solid rgba(var(--bs-border-color-translucent), 0.2);
+}
+
+/* Style for variations within email messages */
+.email-variation {
+    margin-bottom: 1rem; /* Space below each variation */
+}
+.email-variation:last-child {
+    margin-bottom: 0; /* No space after the last one */
+}
+
+/* Style for hr within email variations */
+.email-variation hr {
+    border-top: 1px solid rgba(var(--bs-border-color-translucent), 0.3);
+}
+
+
+/* Dynamic Header Styles */
+#dynamic-header {
+    padding: 0.75rem 1rem; /* Add some padding */
+    background-color: var(--sidebar-bg); /* Use sidebar background for consistency */
+    border-bottom: 1px solid var(--border-color); /* Subtle separator */
+    color: var(--text-color);
+    font-family: 'Amatic SC', cursive; /* Apply new font */
+    font-size: 2.8rem; /* Adjusted size for Amatic SC */
+    font-weight: 700; /* Bold weight */
+    flex-shrink: 0; /* Prevent shrinking in flex layouts */
+    text-align: center; /* Center the text */
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .sidebar {
+        height: auto; /* Allow sidebar height to adjust on mobile */
+        max-height: 40vh; /* Limit height on mobile */
+        overflow-y: auto; /* Ensure scrolling if needed */
+    }
+    .left-sidebar {
+        border-right: none; /* Remove right border */
+        border-bottom: 1px solid var(--bs-border-color); /* Add bottom border */
+    }
+    .right-sidebar {
+        border-left: none; /* Remove left border */
+        border-top: 1px solid var(--bs-border-color); /* Add top border */
+    }
+    .main-content {
+        height: auto; /* Allow main content height to adjust */
+        flex-grow: 1; /* Ensure it takes remaining space */
+    }
+    .chat-display {
+        height: auto; /* Remove fixed height calculation */
+        flex-grow: 1; /* Allow chat to grow */
+        padding-top: 45px; /* Keep space for buttons */
+    }
+    .message {
+        max-width: 95%; /* Allow messages to be slightly wider */
+    }
+}
+
+/* Mode-specific visibility for common settings */
+body.mode-email-active .common-settings-group {
+    display: none;
+}
+
+body.mode-sms-active .common-settings-group {
+    display: block; /* Show when SMS mode is active */
+}

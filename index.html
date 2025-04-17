@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darden Content Generator</title> <!-- Removed (Local Dev) -->
+    <!-- Bootstrap CSS -->
+    <link href="bootstrap.min.css" rel="stylesheet"> <!-- Updated Path -->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+    <!-- Local CSS -->
+    <link rel="stylesheet" href="style.css"> <!-- Path is correct -->
+</head>
+<body>
+    <div class="container-fluid vh-100 d-flex flex-column p-0">
+        <div class="row g-0 flex-grow-1">
+            <!-- Left Sidebar -->
+            <aside class="col-12 col-md-2 bg-light p-3 d-flex flex-column sidebar left-sidebar">
+                 <h2 id="dynamic-header" class="h5 text-center mb-3">Initializing...</h2> <!-- Placeholder for dynamic text -->
+                 <div class="project-selector mb-3">
+                     <label for="project" class="form-label">Project:</label>
+                     <select id="project" name="project" class="form-select form-select-sm">
+                         <option value="Bahama Breeze">Bahama Breeze</option>
+                         <option value="Cheddars">Cheddar's Scratch Kitchen</option>
+                         <option value="Yardhouse">Yard House</option>
+                     </select>
+                 </div>
+                 <!-- Mode Selector -->
+                 <div class="mode-selector mb-3">
+                     <label class="form-label">Mode:</label>
+                     <div class="btn-group btn-group-sm w-100" role="group" aria-label="Mode Selection">
+                         <input type="radio" class="btn-check" name="mode" id="mode-sms" value="sms" autocomplete="off" checked>
+                         <label class="btn btn-outline-primary" for="mode-sms">SMS</label>
+
+                         <input type="radio" class="btn-check" name="mode" id="mode-email" value="email" autocomplete="off">
+                         <label class="btn btn-outline-primary" for="mode-email">Email</label>
+                     </div>
+                 </div>
+                 <!-- Info Text (Common) -->
+                 <div class="info-text small mb-3">
+                    This tool uses AI to help generate marketing copy.
+                    <span class="sms-only">Upload relevant marketing materials and past SMS examples for better results.</span>
+                    <span class="email-only">The AI uses past successful email campaign data for context.</span>
+                 </div>
+                 <!-- SMS Only File Uploads -->
+                 <hr class="my-3 sms-only">
+                 <div class="mb-2 file-group sms-only">
+                     <span class="form-label d-block">Marketing Material (.txt):</span>
+                     <label for="marketing-file" class="file-input-label-button" title="Upload Marketing Material"> Upload</label>
+                     <input type="file" id="marketing-file" name="marketing_file" class="form-control form-control-sm" accept=".txt">
+                     <span class="file-status small text-muted" id="marketing-file-status">No file selected</span>
+                 </div>
+                 <div class="mb-3 file-group sms-only">
+                     <span class="form-label d-block">SMS Examples (.csv, .txt):</span>
+                     <label for="sms-file" class="file-input-label-button" title="Upload SMS Examples"> Upload</label>
+                     <input type="file" id="sms-file" name="sms_file" class="form-control form-control-sm" accept=".csv, .txt">
+                      <span class="file-status small text-muted" id="sms-file-status">No file selected</span>
+                 </div>
+                 <button id="clear-files-button-left" class="btn btn-sm btn-outline-secondary mb-3 sms-only" title="Clear File Selections">Clear Files</button>
+
+                 <button id="clear-project-button" class="btn btn-sm btn-outline-secondary mt-auto" title="Clear Project Selection">Clear Project</button>
+            </aside>
+
+            <!-- Main Content Area (Container for SMS/Email Modes) -->
+            <div class="col-12 col-md-7 d-flex flex-column p-0 main-content-container">
+
+                <!-- SMS Mode Chat Area (Initially Visible) -->
+                <main id="sms-chat-area" class="d-flex flex-column p-0 main-content flex-grow-1">
+                    <div class="chat-display flex-grow-1 p-3" id="sms-chat-display" style="overflow-y: auto;">
+                        <!-- SMS Chat messages will appear here -->
+                        <div class="message ai alert alert-info">Welcome to SMS mode! Select a project and type your request below, or use the settings on the right.</div>
+                    </div>
+                    <button id="clear-sms-history-button" class="btn btn-sm btn-outline-secondary clear-button top-right-button" title="Clear SMS Chat History">Clear SMS History</button>
+                    <button id="download-sms-history-button" class="btn btn-sm btn-outline-secondary clear-button top-right-button" style="top: 45px;" title="Download SMS AI Messages">Download SMS</button>
+                    <div class="chat-input-area p-3 border-top bg-light">
+                        <div class="input-group">
+                            <textarea id="sms-user-input" class="form-control user-input-area" placeholder="Type your SMS request (e.g., 'Generate 3 variations for a weekend special')" rows="2"></textarea>
+                            <button id="sms-send-button" class="btn btn-primary send-button" title="Send SMS Request (Ctrl+Enter)">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </main>
+
+                <!-- Email Mode Chat Area (Initially Hidden) -->
+                <main id="email-chat-area" class="d-none flex-column p-0 main-content flex-grow-1"> <!-- Start hidden -->
+                    <div class="chat-display flex-grow-1 p-3" id="email-chat-display" style="overflow-y: auto;">
+                        <!-- Email Chat messages will appear here -->
+                         <div class="message ai alert alert-info">Welcome to Email mode! Select a project and type your request below, or use the settings on the right.</div>
+                    </div>
+                     <button id="clear-email-history-button" class="btn btn-sm btn-outline-secondary clear-button top-right-button" title="Clear Email Chat History">Clear Email History</button>
+                     <button id="download-email-history-button" class="btn btn-sm btn-outline-secondary clear-button top-right-button" style="top: 45px;" title="Download Email AI Messages">Download Email</button>
+                    <div class="chat-input-area p-3 border-top bg-light">
+                        <div class="input-group">
+                            <textarea id="email-user-input" class="form-control user-input-area" placeholder="Type your Email request (e.g., 'Generate subject and message for summer sale')" rows="2"></textarea>
+                            <button id="email-send-button" class="btn btn-primary send-button" title="Send Email Request (Ctrl+Enter)">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </main>
+
+            </div> <!-- End Main Content Area Container -->
+
+            <!-- Right Sidebar (Settings) -->
+            <aside class="col-12 col-md-3 bg-light p-3 d-flex flex-column sidebar right-sidebar">
+                <h2 class="h5 mb-3">Settings</h2>
+                <p class="small text-muted mb-3 fst-italic">
+                    Note: Settings entered here override instructions in the main chat input.
+                    Clear a field (using the '×' button or 'Clear Settings') to let the chat input take priority for that parameter.
+                    Inputs with a <span class="input-active-glow px-1 rounded">glow</span> are currently active.
+                </p>
+                <form id="settings-form" class="flex-grow-1" style="overflow-y: auto;">
+
+                    <!-- Common Settings -->
+                    <div class="common-settings-group"> <!-- Wrapper for common settings -->
+                    <div class="mb-2">
+                        <label for="topic" class="form-label">Topic:</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="topic" name="topic" class="form-control form-control-sm" placeholder="e.g., happy hour, mother's day">
+                            <button type="button" class="btn btn-outline-secondary clear-input-btn" aria-label="Clear topic" data-target-input="topic" title="Clear Topic">&times;</button>
+                        </div>
+                    </div>
+                    <div class="mb-2" style="display: none;">
+                        <label for="date" class="form-label">Target Date:</label>
+                        <div class="input-group input-group-sm">
+                            <input type="date" id="date" name="date" class="form-control form-control-sm">
+                            <button type="button" class="btn btn-outline-secondary clear-input-btn" aria-label="Clear date" data-target-input="date" title="Clear Date">&times;</button>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="tone" class="form-label">Desired Tone:</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="tone" name="tone" class="form-control form-control-sm" placeholder="e.g., urgent, friendly">
+                            <button type="button" class="btn btn-outline-secondary clear-input-btn" aria-label="Clear tone" data-target-input="tone" title="Clear Tone">&times;</button>
+                        </div>
+                    </div>
+                    <div class="mb-3" style="display: none;"> <!-- Hidden per user request 2025-04-15 -->
+                        <label for="href" class="form-label">CTA Link (href):</label>
+                        <div class="input-group input-group-sm">
+                            <input type="url" id="href" name="href" class="form-control form-control-sm" placeholder="https://example.com/offer">
+                            <button type="button" class="btn btn-outline-secondary clear-input-btn" aria-label="Clear link" data-target-input="href" title="Clear Link">&times;</button>
+                        </div>
+                    </div>
+                    </div> <!-- End common settings group 1 -->
+
+                    <hr class="my-3"> <!-- Common divider -->
+
+                    <!-- Email Only Settings -->
+                    <div class="mb-2 email-only">
+                        <label for="email-subject" class="form-label">Subject Line:</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="email-subject" name="subject" class="form-control form-control-sm" placeholder="e.g., A Special Offer Just For You!">
+                            <button type="button" class="btn btn-outline-secondary clear-input-btn" aria-label="Clear subject" data-target-input="email-subject" title="Clear Subject">&times;</button>
+                        </div>
+                    </div>
+                    <div class="mb-3 email-only">
+                        <label for="email-message" class="form-label">Message Text:</label>
+                        <div class="input-group input-group-sm">
+                            <textarea id="email-message" name="message" class="form-control form-control-sm" rows="3" placeholder="Optional: Provide email body text..."></textarea>
+                            <button type="button" class="btn btn-outline-secondary clear-input-btn" aria-label="Clear message" data-target-input="email-message" title="Clear Message Text">&times;</button>
+                        </div>
+                    </div>
+                    <hr class="my-3 email-only"> <!-- Divider specific to email section -->
+
+                    <!-- SMS Only Settings -->
+                    <div class="mb-2 sms-only">
+                         <label for="length" class="form-label">Approx. Length (chars):</label>
+                         <div class="input-group input-group-sm">
+                             <input  id="length" name="length" class="form-control form-control-sm" placeholder="e.g., 140">
+                             <button type="button" class="btn btn-outline-secondary clear-input-btn" aria-label="Clear length" data-target-input="length" title="Clear Length">&times;</button>
+                         </div>
+                     </div>
+                         <p class="small text-muted mb-3 sms-only">Note: Max length is 160 chars total (134 before link). With emoji, max is 70 chars total (44 before link).</p>
+
+                    <!-- Common Settings Continued -->
+                    <div class="common-settings-group"> <!-- Wrapper for common settings continued -->
+                    <div class="mb-2">
+                        <label for="num-results" class="form-label">Number of Results:</label>
+                        <div class="input-group input-group-sm">
+                            <input type="number" id="num-results" name="num_results" class="form-control form-control-sm" value="1" min="1" max="20"> <!-- Changed type to number -->
+                            <button type="button" class="btn btn-outline-secondary clear-input-btn" aria-label="Clear number of results" data-target-input="num-results" title="Clear Number of Results">&times;</button>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch mb-3 input-wrapper"> <!-- Emojis toggle common -->
+                        <input class="form-check-input" type="checkbox" id="use-emojis" name="use_emojis">
+                        <label class="form-check-label" for="use-emojis">Use Emojis</label>
+                    </div>
+                    </div> <!-- End common settings group 2 -->
+
+                </form>
+                 <div class="button-group mt-auto border-top pt-3">
+                     <button id="clear-settings-button" class="btn btn-sm btn-outline-secondary me-2" title="Clear All Settings Inputs">Clear Settings</button>
+                 </div>
+                 <div class="api-notice small text-muted mt-2">
+                    AI generation powered by Google Gemini via backend API.
+                 </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- API Key Modal (Bootstrap) -->
+    <div class="modal fade" id="api-key-modal" tabindex="-1" aria-labelledby="apiKeyModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="apiKeyModalLabel">API Key Required</h5>
+                    <!-- No close button intentionally -->
+                </div>
+                <div class="modal-body">
+                    <p>Please enter your assigned API key to access the generator.</p>
+                    <div class="mb-3">
+                        <label for="modal-api-key-input" class="form-label">API Key:</label>
+                        <input type="password" class="form-control" id="modal-api-key-input" placeholder="Enter your API key">
+                    </div>
+                    <div id="modal-error-message" class="alert alert-danger mt-2" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="validate-key-button" type="button" class="btn btn-primary">Validate & Save Key</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS (includes Popper) -->
+    <script src="bootstrap.bundle.min.js"></script> <!-- Updated Path -->
+    <!-- Local Script -->
+    <script type="module" src="main.js"></script>
+</body>
+</html>

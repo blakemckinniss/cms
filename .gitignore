@@ -1,0 +1,2 @@
+# Ignore local development API server and secrets
+local-dev-api/
