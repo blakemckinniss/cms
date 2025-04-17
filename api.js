@@ -8,7 +8,7 @@
 
 export const LOCALSTORAGE_API_KEY_NAME = 'userApiKey';
 export const FRONTEND_SECRET_SALT_VALUE = "BLAKE123";
-const PRODUCTION_BACKEND_BASE_URL = "https://sms-backend-generator.onrender.com";
+const PRODUCTION_BACKEND_BASE_URL = "https://cms-backend-zzz5.onrender.com";
 const LOCAL_BACKEND_BASE_URL = 'http://localhost:3001';
 
 // Allow override via ?apiBase=... or localStorage (for advanced dev use)
