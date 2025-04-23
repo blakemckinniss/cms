@@ -13,7 +13,7 @@ let wsQueue = [];
 
 function connectWebSocket() {
     sessionId = uuidv4();
-    ws = new WebSocket((window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host.replace(/:\d+$/, ':3001'));
+    ws = new WebSocket('wss://cms-backend-zzz5.onrender.com'); // Use deployed backend URL
     ws.onopen = () => {
         wsReady = true;
         ws.send(JSON.stringify({ type: 'register', sessionId }));
