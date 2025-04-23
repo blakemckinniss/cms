@@ -14,8 +14,9 @@ let getSmsMessageHistoryButton = () => null; // Add getter for the new button
 let getEmailMessageHistoryButton = () => null; // Add getter for the new button
 let getSmsUserInput = () => null; // Getter for SMS input textarea
 let getEmailUserInput = () => null; // Getter for Email input textarea
-let getTopicInput = () => null; // Getter for Topic setting input
-let getToneInput = () => null; // Getter for Tone setting input
+let getTopicInput = () => null; // Getter for Topic select element
+let getTopicCustomInput = () => null; // NEW: Getter for Topic custom input element
+let getToneInput = () => null; // Getter for Tone select element
 let getSmsEnhanceButton = () => null; // Getter for SMS Enhance button
 let getSmsGenerateButton = () => null; // Getter for SMS Generate button
 let getEmailEnhanceButton = () => null; // Getter for Email Enhance button
@@ -38,8 +39,9 @@ const checkIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height=
  * @param {function} config.getProjectSelect - Function to get the project select element.
  * @param {function} config.getSmsUserInput - Function to get the SMS user input element.
  * @param {function} config.getEmailUserInput - Function to get the Email user input element.
- * @param {function} config.getTopicInput - Function to get the Topic input element.
- * @param {function} config.getToneInput - Function to get the Tone input element.
+ * @param {function} config.getTopicInput - Function to get the Topic select element.
+ * @param {function} config.getTopicCustomInput - Function to get the Topic custom input element.
+ * @param {function} config.getToneInput - Function to get the Tone select element.
  * @param {function} config.getSmsEnhanceButton - Function to get the SMS Enhance button element.
  * @param {function} config.getSmsGenerateButton - Function to get the SMS Generate button element.
  * @param {function} config.getEmailEnhanceButton - Function to get the Email Enhance button element.
@@ -57,8 +59,9 @@ export function configureChat(config) {
     // Assign new getters for prompt enhancement/generation
     getSmsUserInput = config.getSmsUserInput || getSmsUserInput;
     getEmailUserInput = config.getEmailUserInput || getEmailUserInput;
-    getTopicInput = config.getTopicInput || getTopicInput;
-    getToneInput = config.getToneInput || getToneInput;
+    getTopicInput = config.getTopicInput || getTopicInput; // Gets topic-select
+    getTopicCustomInput = config.getTopicCustomInput || getTopicCustomInput; // NEW
+    getToneInput = config.getToneInput || getToneInput; // Gets tone select
     getSmsEnhanceButton = config.getSmsEnhanceButton || getSmsEnhanceButton;
     getSmsGenerateButton = config.getSmsGenerateButton || getSmsGenerateButton;
     getEmailEnhanceButton = config.getEmailEnhanceButton || getEmailEnhanceButton;
@@ -702,24 +705,46 @@ async function handleEnhanceClick(event) {
 async function handleGenerateClick(event) {
     const mode = getCurrentMode();
     const userInput = mode === 'sms' ? getSmsUserInput() : getEmailUserInput();
-    const topicInput = getTopicInput();
-    const toneInput = getToneInput();
+    const topicSelect = getTopicInput(); // This now gets the <select> element
+    const topicCustom = getTopicCustomInput(); // Get the custom text input
+    const toneInput = getToneInput(); // This gets the <select> element for tone
     const button = event.target; // The button that was clicked
 
-    if (!userInput || !topicInput || !toneInput) {
-        console.error("Generate failed: Required input elements not found.");
-        addMessageToChat('ai', 'Error: Could not find Topic/Tone settings or chat input box.', false, { asHtml: false });
+    if (!userInput || !topicSelect || !topicCustom || !toneInput) {
+        console.error("Generate failed: Required input elements (user input, topic select/custom, tone) not found.");
+        addMessageToChat('ai', 'Error: Could not find required Topic/Tone settings or chat input box.', false, { asHtml: false });
         return;
     }
 
-    const topic = topicInput.value.trim();
-    const tone = toneInput.value.trim();
+    // Determine the final topic value
+    let finalTopic = '';
+    const selectedTopicValue = topicSelect.value;
+    const customTopicValue = topicCustom.value.trim();
 
-    if (!topic || !tone) {
-        addMessageToChat('ai', 'Info: Please enter both a "Topic" and a "Desired Tone" in the Settings panel to generate a prompt.', false, { asHtml: false });
-        // Optionally focus the first empty field
-        if (!topic) topicInput.focus();
-        else toneInput.focus();
+    if (selectedTopicValue === 'other') {
+        if (customTopicValue) {
+            finalTopic = customTopicValue;
+        }
+    } else if (selectedTopicValue) {
+        finalTopic = selectedTopicValue;
+    }
+
+    const tone = toneInput.value; // Get value from tone select
+
+    // Validation: Check if a final topic and tone were determined
+    if (!finalTopic || !tone) {
+        let errorMsg = 'Info: Please select both a "Topic" and a "Desired Tone" in the Settings panel';
+        if (selectedTopicValue === 'other' && !customTopicValue) {
+            errorMsg += ' (and enter a custom topic)';
+            topicCustom.focus(); // Focus custom input if 'Other' is selected but empty
+        } else if (!finalTopic) {
+            errorMsg += '.';
+            topicSelect.focus(); // Focus select if no topic chosen
+        } else { // Only tone is missing
+            errorMsg += '.';
+            toneInput.focus(); // Focus tone if topic is okay
+        }
+        addMessageToChat('ai', errorMsg + ' to generate a prompt.', false, { asHtml: false });
         return;
     }
 
@@ -729,10 +754,10 @@ async function handleGenerateClick(event) {
     button.title = 'Processing...';
 
     try {
-        const result = await generatePrompt(mode, topic, tone); // Call API function
+        const result = await generatePrompt(mode, finalTopic, tone); // Use finalTopic and tone
         if (result && result.generatedPrompt) {
             userInput.value = result.generatedPrompt; // Update textarea
-            addMessageToChat('ai', `Prompt generated for Topic: "${topic}", Tone: "${tone}".`, false, { asHtml: false });
+            addMessageToChat('ai', `Prompt generated for Topic: "${finalTopic}", Tone: "${tone}".`, false, { asHtml: false }); // Use finalTopic in message
             // Trigger input event to update settings glow if needed
             userInput.dispatchEvent(new Event('input', { bubbles: true }));
         } else {

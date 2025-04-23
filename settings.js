@@ -24,6 +24,11 @@ let projectSelect = null;
 let numResultsInput = null;
 let lengthInput = null;
 let emojiToggle = null; // Added for dynamic length limit
+let topicSelect = null; // NEW: Topic dropdown
+let topicCustom = null; // NEW: Custom topic input
+let topicDescription = null; // NEW: Topic description display
+let toneSelect = null; // NEW: Tone dropdown (reusing existing ID 'tone')
+let toneDescription = null; // NEW: Tone description display
 let saveState = () => {}; // Function to trigger saving state
 let advancedOptionsModalInstance = null; // Bootstrap Modal instance
 
@@ -45,10 +50,15 @@ export function configureSettings(config) {
     numResultsInput = config.getNumResultsInput ? config.getNumResultsInput() : document.getElementById('num-results');
     lengthInput = document.getElementById('length');
     emojiToggle = document.getElementById('use-emojis'); // Cache emoji toggle
+    topicSelect = document.getElementById('topic-select'); // NEW
+    topicCustom = document.getElementById('topic-custom'); // NEW
+    topicDescription = document.getElementById('topic-description'); // NEW
+    toneSelect = document.getElementById('tone'); // NEW - Get tone select
+    toneDescription = document.getElementById('tone-description'); // NEW - Get tone description div
     saveState = config.saveState || saveState;
 
-    if (!settingsForm || !projectSelect || !numResultsInput) {
-        console.error("Settings Configuration Error: Form, project select, or num results input not found.");
+    if (!settingsForm || !projectSelect || !numResultsInput || !topicSelect || !topicCustom || !topicDescription || !toneSelect || !toneDescription) {
+        console.error("Settings Configuration Error: Form, project select, num results, topic select/custom/description, or tone select/description input not found.");
     }
 }
 
@@ -70,6 +80,7 @@ export function storeDefaultSettings() {
                     defaultSettingsValues[element.name] = element.defaultChecked;
                 } else {
                     // Use defaultValue for text inputs/textareas, value for select initial state
+                    // For topic-select, the default is the first option's value ("")
                     defaultSettingsValues[element.name] = element.defaultValue !== undefined ? element.defaultValue : element.value;
                 }
             }
@@ -126,6 +137,13 @@ export function updateInputGlow(inputElement) {
         isDefault = (currentVal === defaultVal);
     }
 
+    // Special handling for custom topic input glow
+    if (inputElement.id === 'topic-custom') {
+        const isOtherSelected = topicSelect && topicSelect.value === 'other';
+        // Only consider it "not default" (and thus glowing) if 'Other' is selected AND it has a value
+        isDefault = !(isOtherSelected && currentVal !== '');
+    }
+
     if (inputElement.classList) {
         if (!isDefault) {
             inputElement.classList.add(GLOW_CLASS);
@@ -166,8 +184,13 @@ export function getSettings() {
     settings.mode = mode;
 
     // --- Standard Settings ---
+    // Clear potential topic values from formData initially, we'll handle it manually
+    formData.delete('topic_select');
+    formData.delete('topic_custom');
+
     for (const [key, value] of formData.entries()) {
-        if (key === 'marketing_file' || key === 'sms_file' || key === 'modal_api_key_input' || key === 'mode') continue;
+        // Skip file inputs, modal key, mode, and topic inputs (handled manually)
+        if (key === 'marketing_file' || key === 'sms_file' || key === 'modal_api_key_input' || key === 'mode' || key.startsWith('topic_')) continue;
 
         const potentialElementOrList = settingsForm.elements[key];
         if (!potentialElementOrList) continue;
@@ -196,6 +219,27 @@ export function getSettings() {
             }
         }
     }
+
+    // --- Manual Topic Handling ---
+    let finalTopic = '';
+    if (topicSelect && topicCustom) {
+        const selectedTopicValue = topicSelect.value;
+        if (selectedTopicValue === 'other') {
+            // Use custom input only if 'Other' is selected AND the custom input has a value AND it's glowing
+            if (topicCustom.value.trim() !== '' && topicCustom.classList.contains(GLOW_CLASS)) {
+                finalTopic = topicCustom.value.trim();
+            }
+        } else if (selectedTopicValue !== '') {
+            // Use dropdown value if it's not 'Other', not empty, AND it's glowing
+            if (topicSelect.classList.contains(GLOW_CLASS)) {
+                finalTopic = selectedTopicValue;
+            }
+        }
+    }
+    if (finalTopic) {
+        settings.topic = finalTopic; // Add 'topic' key only if a valid topic is determined
+    }
+    // --- End Manual Topic Handling ---
 
     settings.project = projectSelect.value;
     let numRes = parseInt(numResultsInput.value, 10);
@@ -238,6 +282,8 @@ export function clearSettings() {
     storeDefaultSettings();
     // Update glows based on the now-default values
     updateAllSettingsGlows();
+    // Manually handle topic description/custom visibility after reset
+    handleTopicChange();
     // Trigger state saving
     saveState();
 }
@@ -274,6 +320,27 @@ function handleClearInputButtonClick(event) {
             targetInput.checked = defaultValue;
         } else {
             targetInput.value = defaultValue;
+        }
+    }
+
+    // Special handling for clearing topic
+    if (targetInputId === 'topic-select') {
+        if (topicCustom) {
+            topicCustom.value = ''; // Clear custom input as well
+            topicCustom.classList.remove(GLOW_CLASS); // Remove glow from custom
+            topicCustom.classList.add('d-none'); // Hide custom
+        }
+        if (topicDescription) {
+            topicDescription.textContent = ''; // Clear description
+        }
+        // Trigger event for custom input too, if it exists
+        if (topicCustom) triggerInputEvent(topicCustom);
+    }
+
+    // Special handling for clearing tone
+    if (targetInputId === 'tone') {
+        if (toneDescription) {
+            toneDescription.textContent = ''; // Clear description
         }
     }
 
@@ -422,6 +489,64 @@ function resetAdvancedSettings() {
 }
 
 
+// --- Topic Hybrid Input Logic ---
+
+/**
+ * Handles changes to the topic dropdown selection.
+ * Shows/hides the custom input and updates the description text.
+ */
+function handleTopicChange() {
+    if (!topicSelect || !topicCustom || !topicDescription) return;
+
+    const selectedOption = topicSelect.options[topicSelect.selectedIndex];
+    const description = selectedOption ? selectedOption.dataset.description || '' : '';
+    const isOther = topicSelect.value === 'other';
+
+    // Update description text
+    topicDescription.textContent = description;
+
+    // Show/hide custom input and description
+    if (isOther) {
+        topicCustom.classList.remove('d-none');
+        topicDescription.classList.add('d-none'); // Hide description when 'Other' is selected
+        // Do not clear topicCustom.value here, let user manage it
+    } else {
+        topicCustom.classList.add('d-none');
+        topicDescription.classList.remove('d-none'); // Show description for non-'Other'
+        // Optionally clear topicCustom.value when switching away from 'Other'?
+        // topicCustom.value = ''; // Let's not clear it automatically for now.
+    }
+
+    // Update glows for both elements
+    updateInputGlow(topicSelect);
+    updateInputGlow(topicCustom);
+
+    // Save state whenever the dropdown changes
+    saveState();
+}
+
+// --- Tone Description Logic ---
+
+/**
+ * Handles changes to the tone dropdown selection.
+ * Updates the description text.
+ */
+function handleToneChange() {
+    if (!toneSelect || !toneDescription) return;
+
+    const selectedOption = toneSelect.options[toneSelect.selectedIndex];
+    const description = selectedOption ? selectedOption.dataset.description || '' : '';
+
+    // Update description text
+    toneDescription.textContent = description;
+
+    // Update glow for the select element
+    updateInputGlow(toneSelect);
+
+    // Save state whenever the dropdown changes
+    saveState();
+}
+
 // --- Initialization ---
 
 /**
@@ -486,8 +611,14 @@ export function initializeSettings() {
     settingsForm.addEventListener('input', (event) => {
         const target = event.target;
         if (target && target.matches('input, textarea, select') && !target.closest('#advanced-options-modal')) { // Exclude modal inputs
+            // Standard glow update and save
             updateInputGlow(target);
             saveState(); // Trigger debounced save
+
+            // If the target is the custom topic input, also update the select's glow potentially
+            if (target.id === 'topic-custom') {
+                updateInputGlow(topicSelect); // Re-evaluate select glow based on custom input change
+            }
         }
     });
 
@@ -503,6 +634,32 @@ export function initializeSettings() {
     }
     if (emojiToggle) {
         emojiToggle.addEventListener('change', updateLengthInputLimits);
+    }
+
+    // Add listener for topic dropdown change
+    if (topicSelect) {
+        topicSelect.addEventListener('change', handleTopicChange);
+        // Initial call to set state based on loaded value
+        handleTopicChange();
+    }
+
+    // Add listener for custom topic input to update glows on input
+    if (topicCustom) {
+        topicCustom.addEventListener('input', () => {
+            updateInputGlow(topicCustom);
+            // Also potentially update the glow of the select if 'Other' is chosen
+            if (topicSelect && topicSelect.value === 'other') {
+                updateInputGlow(topicSelect);
+            }
+            saveState(); // Save on custom input change too
+        });
+    }
+
+    // Add listener for tone dropdown change
+    if (toneSelect) {
+        toneSelect.addEventListener('change', handleToneChange);
+        // Initial call to set state based on loaded value
+        handleToneChange();
     }
 
     console.log("Settings module initialized.");

@@ -13,7 +13,17 @@ let wsQueue = [];
 
 function connectWebSocket() {
     sessionId = uuidv4();
-    ws = new WebSocket('wss://cms-backend-zzz5.onrender.com'); // Use deployed backend URL
+    // Determine WebSocket URL based on hostname
+    let wsUrl;
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // Local development: Connect to local backend (assuming port 3001)
+        wsUrl = 'ws://localhost:3001';
+    } else {
+        // Deployed environment: Connect to Render backend
+        wsUrl = 'wss://cms-backend-zzz5.onrender.com';
+    }
+    console.log(`Connecting WebSocket to: ${wsUrl}`); // Log the chosen URL
+    ws = new WebSocket(wsUrl);
     ws.onopen = () => {
         wsReady = true;
         ws.send(JSON.stringify({ type: 'register', sessionId }));
@@ -226,10 +236,13 @@ function getSmsUserInput() {
 function getEmailUserInput() {
     return document.getElementById('email-user-input');
 }
-function getTopicInput() {
-    return document.getElementById('topic');
+function getTopicInput() { // Renamed conceptually, points to select now
+    return document.getElementById('topic-select');
 }
-function getToneInput() {
+function getTopicCustomInput() { // New getter for custom input
+    return document.getElementById('topic-custom');
+}
+function getToneInput() { // Corrected to point to the tone select
     return document.getElementById('tone');
 }
 function getSmsEnhanceButton() {
@@ -298,8 +311,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Pass getters for prompt enhancement/generation
         getSmsUserInput: getSmsUserInput,
         getEmailUserInput: getEmailUserInput,
-        getTopicInput: getTopicInput,
-        getToneInput: getToneInput,
+        getTopicInput: getTopicInput, // Now points to topic-select
+        getTopicCustomInput: getTopicCustomInput, // Pass new getter
+        getToneInput: getToneInput, // Corrected getter
         getSmsEnhanceButton: getSmsEnhanceButton,
         getSmsGenerateButton: getSmsGenerateButton,
         getEmailEnhanceButton: getEmailEnhanceButton,

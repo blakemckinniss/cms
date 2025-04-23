@@ -120,21 +120,51 @@
             <!-- Right Sidebar (Settings) -->
             <aside class="col-12 col-md-3 bg-light p-3 d-flex flex-column sidebar right-sidebar">
                 <h2 class="h5 mb-3">Settings</h2>
-                <p class="small text-muted mb-3 fst-italic">
+                <!-- <p class="small text-muted mb-3 fst-italic">
                     Note: Settings entered here override instructions in the main chat input.
                     Clear a field (using the '×' button or 'Clear Settings') to let the chat input take priority for that parameter.
                     Inputs with a <span class="input-active-glow px-1 rounded">glow</span> are currently active.
-                </p>
+                </p> -->
                 <form id="settings-form" class="flex-grow-1" style="overflow-y: auto;">
 
                     <!-- Common Settings -->
                     <div class="common-settings-group"> <!-- Wrapper for common settings -->
                     <div class="mb-2">
-                        <label for="topic" class="form-label">Topic:</label>
+                        <label for="topic-select" class="form-label">Topic:</label>
                         <div class="input-group input-group-sm">
-                            <input type="text" id="topic" name="topic" class="form-control form-control-sm" placeholder="e.g., happy hour, mother's day">
-                            <button type="button" class="btn btn-outline-secondary clear-input-btn" aria-label="Clear topic" data-target-input="topic" title="Clear Topic">&times;</button>
+                            <select id="topic-select" name="topic_select" class="form-select form-select-sm">
+                                <option value="" data-description="">Select Topic...</option>
+                                <option value="other" data-description="">CUSTOM (Select; Specify below)</option>
+                                <option value="New Menu Launches & Limited-Time Dishes" data-description="(e.g., seasonal entrées, chef’s specials, holiday desserts)">New Menu Launches & Limited-Time Dishes</option>
+                                <option value="Happy-Hour or Bar Features" data-description="Daily drink deals, wine pairings, craft-cocktail spotlights">Happy-Hour or Bar Features</option>
+                                <option value="Loyalty / Rewards Updates" data-description="Point balances, bonus-point days, VIP early access">Loyalty / Rewards Updates</option>
+                                <option value="Flash Discounts & Promo Codes" data-description="“Tonight only,” BOGO entrées, free appetizer with order">Flash Discounts & Promo Codes</option>
+                                <option value="Curbside & Delivery Reminders" data-description="Free delivery windows, curbside how-to, order-ahead perks">Curbside & Delivery Reminders</option>
+                                <option value="Reservation & Waitlist Alerts" data-description="Confirmations, table-ready pings, running-late grace periods">Reservation & Waitlist Alerts</option>
+                                <option value="Event & Celebration Packages" data-description="Graduation dinners, rehearsal parties, large-group menus">Event & Celebration Packages</option>
+                                <option value="Holiday-Themed Specials" data-description="Mother’s Day brunch, Valentine’s prix fixe, Thanksgiving to-go">Holiday-Themed Specials</option>
+                                <option value="Gift Card Promotions" data-description="Bonus-card events, last-minute digital cards, corporate gifting">Gift Card Promotions</option>
+                                <option value="Catering & Business Lunch Offers" data-description="Meeting platters, boxed lunches, volume discounts">Catering & Business Lunch Offers</option>
+                                <option value="New Location / Remodel Announcements" data-description="Grand openings, soft-launch previews, job-fair invites">New Location / Remodel Announcements</option>
+                                <option value="Market-Price or Availability Updates" data-description="Lobsterfest returns, fresh-catch features, sold-out notices">Market-Price or Availability Updates</option>
+                                <option value="Feedback & Guest Surveys" data-description="Post-visit NPS, quick polls, sweepstakes for responses">Feedback & Guest Surveys</option>
+                                <option value="Allergen & Nutrition Highlights" data-description="Gluten-friendly additions, calorie-smart menus, ingredient swaps">Allergen & Nutrition Highlights</option>
+                                <option value="Community & Charity Partnerships" data-description="Fund-raiser nights, disaster-relief matching, local sponsorships">Community & Charity Partnerships</option>
+                                <option value="Weather-Triggered Offers" data-description="Free soup on rainy days, iced drinks during heat waves">Weather-Triggered Offers</option>
+                                <option value="Birthday / Anniversary Greetings" data-description="Personal milestones with small gift or dessert">Birthday / Anniversary Greetings</option>
+                                <option value="Cooking Tips & At-Home Recipes" data-description="Chef’s secrets, sauce kits, virtual cooking classes">Cooking Tips & At-Home Recipes</option>
+                                <option value="Digital Ordering Features" data-description="App updates, saved favorites, Apple/Google Pay rollout">Digital Ordering Features</option>
+                                <option value="Contest & Sweepstakes Alerts" data-description="“Dinner for a Year,” social media challenges, trivia nights">Contest & Sweepstakes Alerts</option>
+                                <option value="Cross-Brand Bundles" data-description="Pairing gift cards or meal deals across sister concepts">Cross-Brand Bundles</option>
+                                <option value="Sustainability & Sourcing Stories" data-description="Local farm partners, seafood traceability, waste-reduction wins">Sustainability & Sourcing Stories</option>
+                                <option value="Staff Spotlights & Behind-the-Scenes" data-description="Chef interviews, bartender profiles, kitchen innovations">Staff Spotlights & Behind-the-Scenes</option>
+                                <option value="Low-Traffic Day Stimulus" data-description="Mid-week specials, late-night snacks, early-bird deals">Low-Traffic Day Stimulus</option>
+                                <option value="Service Status Notifications" data-description="Power-outage closures, altered hours, inclement-weather delays">Service Status Notifications</option>
+                            </select>
+                            <button type="button" class="btn btn-outline-secondary clear-input-btn" aria-label="Clear topic" data-target-input="topic-select" title="Clear Topic">&times;</button>
                         </div>
+                        <input type="text" id="topic-custom" name="topic_custom" class="form-control form-control-sm mt-1 d-none" placeholder="Enter custom topic...">
+                        <div id="topic-description" class="form-text small text-muted fst-italic mt-1"></div>
                     </div>
                     <div class="mb-2" style="display: none;">
                         <label for="date" class="form-label">Target Date:</label>
@@ -146,9 +176,32 @@
                     <div class="mb-2">
                         <label for="tone" class="form-label">Desired Tone:</label>
                         <div class="input-group input-group-sm">
-                            <input type="text" id="tone" name="tone" class="form-control form-control-sm" placeholder="e.g., urgent, friendly">
+                            <select id="tone" name="tone" class="form-select form-select-sm">
+                                <option value="" data-description="" selected>Select Tone...</option>
+                                <option value="Conversational / Casual" data-description="Sounds like a quick text from a friend; great for community engagement.">Conversational / Casual</option>
+                                <option value="Friendly / Warm" data-description="Conversational, makes the recipient feel at ease (e.g., appointment reminders, welcome messages).">Friendly / Warm</option>
+                                <option value="Professional" data-description="Polished and concise; good for business updates or service notifications.">Professional</option>
+                                <option value="Authoritative" data-description="Confident and expert; ideal for policy notices, official statements.">Authoritative</option>
+                                <option value="Playful / Fun" data-description="Light-hearted language, emojis or puns; works for promos to younger audiences.">Playful / Fun</option>
+                                <option value="Humorous / Witty" data-description="Elicits a smile, but stays on-brand; great for engagement campaigns.">Humorous / Witty</option>
+                                <option value="Urgent / Time-Sensitive" data-description="Creates immediacy (“Ends tonight!”); drives quick action.">Urgent / Time-Sensitive</option>
+                                <option value="Promotional / Sales-Driven" data-description="Highlights a clear offer or discount with a call-to-action.">Promotional / Sales-Driven</option>
+                                <option value="Informative / Factual" data-description="Delivers straightforward details without fluff (order confirmations, tracking links).">Informative / Factual</option>
+                                <option value="Empathetic / Caring" data-description="Shows understanding of the recipient’s situation; useful in support or delay notices.">Empathetic / Caring</option>
+                                <option value="Apologetic" data-description="Acknowledges an error and offers a remedy (“We’re sorry—here’s 10 % off”).">Apologetic</option>
+                                <option value="Reassuring / Trust-Building" data-description="Calms concerns (“Your data is secure with us”).">Reassuring / Trust-Building</option>
+                                <option value="Inspirational / Motivational" data-description="Sparks enthusiasm or confidence (“You’ve got this!”).">Inspirational / Motivational</option>
+                                <option value="Celebratory" data-description="Shares excitement (“🎉 Happy birthday, Blake! Enjoy a free dessert.”).">Celebratory</option>
+                                <option value="Exclusive / VIP" data-description="Makes the reader feel special (“Early access just for you”).">Exclusive / VIP</option>
+                                <option value="Formal" data-description="Follows etiquette, avoids contractions; suitable for legal or compliance messages.">Formal</option>
+                                <option value="Concise / No-Nonsense" data-description="Stripped to essentials; perfect for transactional alerts.">Concise / No-Nonsense</option>
+                                <option value="Supportive / Encouraging" data-description="Cheers the recipient on (“Keep up the great work!”).">Supportive / Encouraging</option>
+                                <option value="Confidential / Discreet" data-description="Low-key tone for sensitive info (e.g., medical, financial).">Confidential / Discreet</option>
+                                <option value="Thankful / Appreciative" data-description="Expresses gratitude (“Thanks for your purchase!”).">Thankful / Appreciative</option>
+                            </select>
                             <button type="button" class="btn btn-outline-secondary clear-input-btn" aria-label="Clear tone" data-target-input="tone" title="Clear Tone">&times;</button>
                         </div>
+                        <div id="tone-description" class="form-text small text-muted fst-italic mt-1"></div>
                     </div>
                     <div class="mb-3" style="display: none;"> <!-- Hidden per user request 2025-04-15 -->
                         <label for="href" class="form-label">CTA Link (href):</label>
