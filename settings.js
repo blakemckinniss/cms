@@ -6,6 +6,16 @@ import { triggerInputEvent } from './utils.js';
 const LS_PROJECT_KEY = 'smsGenProject';
 const GLOW_CLASS = 'input-active-glow';
 
+// Advanced Settings LocalStorage Keys & Defaults
+const LS_ADV_SETTINGS_PREFIX = 'advOpt_';
+const ADV_SETTINGS_CONFIG = {
+    temperature: { lsKey: `${LS_ADV_SETTINGS_PREFIX}temperature`, default: 0.8, elementId: 'adv-temperature', valueId: 'adv-temperature-value' },
+    top_p: { lsKey: `${LS_ADV_SETTINGS_PREFIX}top_p`, default: 0.7, elementId: 'adv-top-p', valueId: 'adv-top-p-value' },
+    frequency_penalty: { lsKey: `${LS_ADV_SETTINGS_PREFIX}frequency_penalty`, default: 0.0, elementId: 'adv-frequency-penalty', valueId: 'adv-frequency-penalty-value' },
+    presence_penalty: { lsKey: `${LS_ADV_SETTINGS_PREFIX}presence_penalty`, default: 0.0, elementId: 'adv-presence-penalty', valueId: 'adv-presence-penalty-value' },
+};
+
+
 // --- Module Scope Variables ---
 let settingsForm = null;
 let getCurrentMode = () => 'sms'; // Function to get current mode
@@ -15,6 +25,7 @@ let numResultsInput = null;
 let lengthInput = null;
 let emojiToggle = null; // Added for dynamic length limit
 let saveState = () => {}; // Function to trigger saving state
+let advancedOptionsModalInstance = null; // Bootstrap Modal instance
 
 // --- Configuration ---
 
@@ -140,7 +151,7 @@ export function updateAllSettingsGlows() {
 // --- Get Settings ---
 
 /**
- * Gathers active settings based on the current mode and glow state.
+ * Gathers active settings based on the current mode and glow state, including advanced options.
  * @returns {object} The settings object to be sent to the backend.
  */
 export function getSettings() {
@@ -154,60 +165,60 @@ export function getSettings() {
     const mode = getCurrentMode();
     settings.mode = mode;
 
+    // --- Standard Settings ---
     for (const [key, value] of formData.entries()) {
         if (key === 'marketing_file' || key === 'sms_file' || key === 'modal_api_key_input' || key === 'mode') continue;
 
         const potentialElementOrList = settingsForm.elements[key];
         if (!potentialElementOrList) continue;
 
-        // Handle NodeList/RadioNodeList (e.g., radio buttons) by checking the first element
         const element = (potentialElementOrList instanceof NodeList || potentialElementOrList instanceof RadioNodeList)
             ? potentialElementOrList[0]
             : potentialElementOrList;
 
-        // Ensure we have a valid element to check
         if (!element || typeof element.closest !== 'function') continue;
 
-        // Only include settings relevant to the current mode AND are actively set (glowing)
         if (isElementRelevantForMode(element, mode)) {
             const isGlowing = element.classList?.contains(GLOW_CLASS);
             const actualElement = (potentialElementOrList instanceof NodeList || potentialElementOrList instanceof RadioNodeList)
                 ? settingsForm.elements[key].value // For RadioNodeList, get the checked value directly
-                : element; // Use the single element otherwise
+                : element;
 
             if (actualElement.type === 'checkbox') {
-                // Include checkbox if it's glowing (different from default) OR if it matches the default state
                 const defaultValue = defaultSettingsValues[key];
-                 // Check the actual element's checked state
                 if (isGlowing || (actualElement.checked === defaultValue)) {
-                     settings[key] = actualElement.checked;
+                    settings[key] = actualElement.checked;
                 }
             } else if (actualElement.type === 'radio') {
-                 // For radio buttons, the value from formData is the one we need if relevant
-                 settings[key] = value;
-            }
-             else if (isGlowing && value && value.trim() !== '') {
-                // Include other inputs only if glowing and have a non-empty value
+                settings[key] = value;
+            } else if (isGlowing && value && value.trim() !== '') {
                 settings[key] = value;
             }
         }
     }
 
-    // Always include project
     settings.project = projectSelect.value;
-
-    // Handle num_results separately - always include its current value, validated
     let numRes = parseInt(numResultsInput.value, 10);
     settings.num_results = (!isNaN(numRes) && numRes >= 1) ? numRes : 1;
-    // If num_results input itself isn't glowing, but we included it, ensure it's not overriding prompt if empty
-    // (This logic might need refinement based on desired priority)
 
-    // Handle use_emojis default if not explicitly included by the logic above
     if (settings.use_emojis === undefined) {
         const emojiCheckbox = settingsForm.elements['use_emojis'];
-        // Default to true if checkbox doesn't exist, otherwise use its current state
         settings.use_emojis = emojiCheckbox ? emojiCheckbox.checked : true;
     }
+
+    // --- Advanced Settings ---
+    for (const paramName in ADV_SETTINGS_CONFIG) {
+        const config = ADV_SETTINGS_CONFIG[paramName];
+        const savedValueStr = localStorage.getItem(config.lsKey);
+        if (savedValueStr !== null) {
+            const savedValue = parseFloat(savedValueStr);
+            // Include if the saved value is different from the default
+            // Or just always include if saved? Let's always include if saved.
+            settings[paramName] = savedValue;
+            console.log(`Including advanced setting: ${paramName}=${savedValue}`);
+        }
+    }
+
 
     console.log("Gathered settings for backend:", settings);
     return settings;
@@ -295,7 +306,7 @@ function updateLengthInputLimits() {
     if (!lengthInput || !emojiToggle) return;
 
     const useEmojis = emojiToggle.checked;
-    const newMax = useEmojis ? 44 : 134;
+    const newMax = useEmojis ? 40 : 134;
     const newPlaceholder = useEmojis ? 'e.g., 44' : 'e.g., 134';
 
     lengthInput.max = newMax;
@@ -343,10 +354,78 @@ function handleNumResultsBlur(event) {
     }
 }
 
+// --- Advanced Options Modal Logic ---
+
+/**
+ * Updates the value display for an advanced setting slider.
+ * @param {HTMLInputElement} sliderElement
+ * @param {HTMLSpanElement} valueElement
+ */
+function updateAdvancedSliderValueDisplay(sliderElement, valueElement) {
+    if (sliderElement && valueElement) {
+        const value = parseFloat(sliderElement.value).toFixed(sliderElement.step.includes('.') ? sliderElement.step.split('.')[1].length : 0);
+        valueElement.textContent = value;
+    }
+}
+
+/**
+ * Loads advanced settings from localStorage and applies them to the modal inputs.
+ */
+function loadAdvancedSettings() {
+    console.log("Loading advanced settings from localStorage...");
+    for (const paramName in ADV_SETTINGS_CONFIG) {
+        const config = ADV_SETTINGS_CONFIG[paramName];
+        const slider = document.getElementById(config.elementId);
+        const valueDisplay = document.getElementById(config.valueId);
+        if (slider && valueDisplay) {
+            const savedValue = localStorage.getItem(config.lsKey);
+            const valueToSet = savedValue !== null ? parseFloat(savedValue) : config.default;
+            slider.value = valueToSet;
+            updateAdvancedSliderValueDisplay(slider, valueDisplay);
+            console.log(`Loaded ${paramName}: ${valueToSet} (Saved: ${savedValue})`);
+        } else {
+            console.warn(`Advanced setting elements not found for: ${paramName}`);
+        }
+    }
+}
+
+/**
+ * Saves an advanced setting value to localStorage.
+ * @param {string} paramName - The API parameter name (e.g., 'temperature').
+ * @param {number} value - The value to save.
+ */
+function saveAdvancedSetting(paramName, value) {
+    const config = ADV_SETTINGS_CONFIG[paramName];
+    if (config) {
+        localStorage.setItem(config.lsKey, value.toString());
+        console.log(`Saved advanced setting: ${paramName}=${value}`);
+    }
+}
+
+/**
+ * Resets advanced settings to their defaults and removes them from localStorage.
+ */
+function resetAdvancedSettings() {
+    console.log("Resetting advanced settings to defaults...");
+    for (const paramName in ADV_SETTINGS_CONFIG) {
+        const config = ADV_SETTINGS_CONFIG[paramName];
+        const slider = document.getElementById(config.elementId);
+        const valueDisplay = document.getElementById(config.valueId);
+        if (slider && valueDisplay) {
+            slider.value = config.default;
+            updateAdvancedSliderValueDisplay(slider, valueDisplay);
+            localStorage.removeItem(config.lsKey);
+            console.log(`Reset ${paramName} to default: ${config.default}`);
+        }
+    }
+    // Optionally trigger saveState() if needed, but likely not required just for reset
+}
+
+
 // --- Initialization ---
 
 /**
- * Initializes the settings module: sets up listeners, stores defaults, applies glows.
+ * Initializes the settings module: sets up listeners, stores defaults, applies glows, handles advanced options modal.
  */
 export function initializeSettings() {
     if (!settingsForm) {
@@ -354,33 +433,66 @@ export function initializeSettings() {
         return;
     }
 
-    // Load initial project selection
+    // --- Standard Settings Initialization ---
     const savedProject = localStorage.getItem(LS_PROJECT_KEY);
     if (savedProject && projectSelect) {
         projectSelect.value = savedProject;
     }
-
-    // Store initial default values based on current mode (which should be set by mode.js first)
     storeDefaultSettings();
-    // Set initial length limits based on default emoji state
     updateLengthInputLimits();
-    // Apply initial glow effects
     updateAllSettingsGlows();
 
-    // --- Event Listeners ---
+    // --- Advanced Options Modal Initialization ---
+    const advancedOptionsModalEl = document.getElementById('advanced-options-modal');
+    const advancedOptionsButton = document.getElementById('advanced-options-button');
+    const resetAdvancedButton = document.getElementById('reset-advanced-options');
 
-    // Update glow and save state on any input change
+    if (advancedOptionsModalEl && advancedOptionsButton && window.bootstrap && window.bootstrap.Modal) {
+        advancedOptionsModalInstance = new bootstrap.Modal(advancedOptionsModalEl);
+
+        advancedOptionsButton.addEventListener('click', () => {
+            loadAdvancedSettings(); // Load latest saved values when opening
+            advancedOptionsModalInstance.show();
+        });
+
+        // Add listeners for sliders
+        for (const paramName in ADV_SETTINGS_CONFIG) {
+            const config = ADV_SETTINGS_CONFIG[paramName];
+            const slider = document.getElementById(config.elementId);
+            const valueDisplay = document.getElementById(config.valueId);
+            if (slider && valueDisplay) {
+                slider.addEventListener('input', () => {
+                    updateAdvancedSliderValueDisplay(slider, valueDisplay);
+                    saveAdvancedSetting(paramName, parseFloat(slider.value));
+                });
+            }
+        }
+
+        // Add listener for reset button
+        if (resetAdvancedButton) {
+            resetAdvancedButton.addEventListener('click', resetAdvancedSettings);
+        }
+
+        // Load initial values on page load (in case modal isn't opened first)
+        loadAdvancedSettings();
+
+    } else {
+        console.warn("Advanced options modal elements or Bootstrap Modal not found. Advanced options disabled.");
+        if (advancedOptionsButton) advancedOptionsButton.disabled = true; // Disable button if modal won't work
+    }
+
+
+    // --- Event Listeners (Standard Settings) ---
     settingsForm.addEventListener('input', (event) => {
-        if (event.target && event.target.matches('input, textarea, select')) {
-            updateInputGlow(event.target);
+        const target = event.target;
+        if (target && target.matches('input, textarea, select') && !target.closest('#advanced-options-modal')) { // Exclude modal inputs
+            updateInputGlow(target);
             saveState(); // Trigger debounced save
         }
     });
 
-    // Handle clicks for individual clear buttons using delegation
     settingsForm.addEventListener('click', handleClearInputButtonClick);
 
-    // Input validation listeners
     if (lengthInput) {
         lengthInput.addEventListener('input', handleNumericInput);
         lengthInput.addEventListener('blur', handleLengthBlur);

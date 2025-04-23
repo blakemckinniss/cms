@@ -30,6 +30,8 @@ function getApiBaseUrl() {
 const BASE_URL = getApiBaseUrl();
 export const VALIDATE_URL = `${BASE_URL}/api/validate-key`;
 export const GENERATE_URL = `${BASE_URL}/api/generate`;
+export const ENHANCE_PROMPT_URL = `${BASE_URL}/api/enhance-prompt`;
+export const GENERATE_PROMPT_URL = `${BASE_URL}/api/generate-prompt`;
 
 /**
  * SHA-256 hash for API key + salt (returns hex string)
@@ -89,9 +91,10 @@ export async function validateApiKey(apiKey) {
  * @param {string} [params.smsData]
  * @returns {Promise<{ok: boolean, data?: any, error?: string}>}
  */
-export async function generateContent({ apiKey, userPrompt, settings, marketingData = "", smsData = "" }) {
+export async function generateContent(params) {
+    const { apiKey, ...rest } = params;
     if (!apiKey) return { ok: false, error: "API key is required" };
-    if (!userPrompt && !(settings && settings.mode === 'email')) return { ok: false, error: "Prompt is required" };
+    if (!rest.userPrompt && !(rest.settings && rest.settings.mode === 'email')) return { ok: false, error: "Prompt is required" };
     const secretHash = await calculateSecretHash(apiKey, FRONTEND_SECRET_SALT_VALUE);
     if (!secretHash) return { ok: false, error: "Configuration error (salt)" };
 
@@ -103,12 +106,7 @@ export async function generateContent({ apiKey, userPrompt, settings, marketingD
                 'X-API-Key': apiKey,
                 'X-Frontend-Secret': secretHash
             },
-            body: JSON.stringify({
-                userPrompt,
-                settings,
-                marketingData,
-                smsData
-            })
+            body: JSON.stringify(rest)
         });
 
         if (!res.ok) {
@@ -141,6 +139,104 @@ export async function generateContent({ apiKey, userPrompt, settings, marketingD
         }
     } catch (err) {
         return { ok: false, error: `Network error: Could not reach the backend. (${err.message})` };
+    }
+}
+
+
+/**
+ * Enhances the given prompt text via the backend API.
+ * @param {string} mode - 'sms' or 'email'.
+ * @param {string} promptText - The text to enhance.
+ * @returns {Promise<{enhancedPrompt?: string, error?: string}>}
+ */
+export async function enhancePrompt(mode, promptText) {
+    const apiKey = localStorage.getItem(LOCALSTORAGE_API_KEY_NAME);
+    if (!apiKey) return { error: "API key not found. Please validate your key first." };
+    if (!promptText) return { error: "Prompt text is required to enhance." };
+
+    const secretHash = await calculateSecretHash(apiKey, FRONTEND_SECRET_SALT_VALUE);
+    if (!secretHash) return { error: "Configuration error (salt)" };
+
+    try {
+        const res = await fetch(ENHANCE_PROMPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': apiKey,
+                'X-Frontend-Secret': secretHash
+            },
+            body: JSON.stringify({ mode, promptText })
+        });
+
+        const data = await res.json(); // Always expect JSON
+
+        if (!res.ok) {
+            let errorMsg = `Error: ${res.status} ${res.statusText}`;
+            if (data && data.error) {
+                if (res.status === 401) errorMsg = "Invalid or unauthorized API Key.";
+                else if (res.status === 403) errorMsg = `Access Denied. (${data.error || 'Check location/key.'})`;
+                else errorMsg = data.error;
+            }
+            return { error: errorMsg };
+        }
+
+        if (data && data.enhancedPrompt) {
+            return { enhancedPrompt: data.enhancedPrompt };
+        } else {
+            return { error: data.error || "Received invalid response from server." };
+        }
+
+    } catch (err) {
+        return { error: `Network error during enhancement: ${err.message}` };
+    }
+}
+
+/**
+ * Generates a new prompt based on topic and tone via the backend API.
+ * @param {string} mode - 'sms' or 'email'.
+ * @param {string} topic - The topic for the prompt.
+ * @param {string} tone - The desired tone for the prompt.
+ * @returns {Promise<{generatedPrompt?: string, error?: string}>}
+ */
+export async function generatePrompt(mode, topic, tone) {
+    const apiKey = localStorage.getItem(LOCALSTORAGE_API_KEY_NAME);
+    if (!apiKey) return { error: "API key not found. Please validate your key first." };
+    if (!topic || !tone) return { error: "Topic and Tone are required to generate a prompt." };
+
+    const secretHash = await calculateSecretHash(apiKey, FRONTEND_SECRET_SALT_VALUE);
+    if (!secretHash) return { error: "Configuration error (salt)" };
+
+    try {
+        const res = await fetch(GENERATE_PROMPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': apiKey,
+                'X-Frontend-Secret': secretHash
+            },
+            body: JSON.stringify({ mode, topic, tone })
+        });
+
+        const data = await res.json(); // Always expect JSON
+
+        if (!res.ok) {
+            let errorMsg = `Error: ${res.status} ${res.statusText}`;
+            if (data && data.error) {
+                if (res.status === 401) errorMsg = "Invalid or unauthorized API Key.";
+                else if (res.status === 403) errorMsg = `Access Denied. (${data.error || 'Check location/key.'})`;
+                else errorMsg = data.error;
+            }
+            return { error: errorMsg };
+        }
+
+        if (data && data.generatedPrompt) {
+            return { generatedPrompt: data.generatedPrompt };
+        } else {
+            return { error: data.error || "Received invalid response from server." };
+        }
+
+    } catch (err) {
+        return { error: `Network error during generation: ${err.message}` };
     }
 }
 

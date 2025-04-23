@@ -77,12 +77,17 @@
                     </div>
                     <button id="clear-sms-history-button" class="btn btn-sm btn-outline-secondary clear-button top-right-button" title="Clear SMS Chat History">Clear SMS History</button>
                     <button id="download-sms-history-button" class="btn btn-sm btn-outline-secondary clear-button top-right-button" style="top: 45px;" title="Download SMS AI Messages">Download SMS</button>
+                    <button id="sms-message-history-button" class="btn btn-sm btn-outline-info clear-button top-right-button d-none" style="top: 80px;" title="Show Message History">Message History</button>
                     <div class="chat-input-area p-3 border-top bg-light">
                         <div class="input-group">
                             <textarea id="sms-user-input" class="form-control user-input-area" placeholder="Type your SMS request (e.g., 'Generate 3 variations for a weekend special')" rows="2"></textarea>
                             <button id="sms-send-button" class="btn btn-primary send-button" title="Send SMS Request (Ctrl+Enter)">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                             </button>
+                        </div>
+                        <div class="prompt-actions mt-2 d-flex justify-content-end">
+                            <button id="sms-enhance-button" class="btn btn-sm btn-outline-secondary me-2" title="Enhance current prompt text">Enhance Prompt</button>
+                            <button id="sms-generate-button" class="btn btn-sm btn-outline-info" title="Generate prompt from Topic & Tone settings">Generate Prompt</button>
                         </div>
                     </div>
                 </main>
@@ -95,12 +100,17 @@
                     </div>
                      <button id="clear-email-history-button" class="btn btn-sm btn-outline-secondary clear-button top-right-button" title="Clear Email Chat History">Clear Email History</button>
                      <button id="download-email-history-button" class="btn btn-sm btn-outline-secondary clear-button top-right-button" style="top: 45px;" title="Download Email AI Messages">Download Email</button>
+                     <button id="email-message-history-button" class="btn btn-sm btn-outline-info clear-button top-right-button d-none" style="top: 80px;" title="Show Message History">Message History</button>
                     <div class="chat-input-area p-3 border-top bg-light">
                         <div class="input-group">
                             <textarea id="email-user-input" class="form-control user-input-area" placeholder="Type your Email request (e.g., 'Generate subject and message for summer sale')" rows="2"></textarea>
                             <button id="email-send-button" class="btn btn-primary send-button" title="Send Email Request (Ctrl+Enter)">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                             </button>
+                        </div>
+                         <div class="prompt-actions mt-2 d-flex justify-content-end">
+                            <button id="email-enhance-button" class="btn btn-sm btn-outline-secondary me-2" title="Enhance current prompt text">Enhance Prompt</button>
+                            <button id="email-generate-button" class="btn btn-sm btn-outline-info" title="Generate prompt from Topic & Tone settings">Generate Prompt</button>
                         </div>
                     </div>
                 </main>
@@ -169,7 +179,7 @@
                     <hr class="my-3 email-only"> <!-- Divider specific to email section -->
 
                     <!-- SMS Only Settings -->
-                    <div class="mb-2 sms-only">
+                    <div class="mb-2 sms-only" style="display:none">
                          <label for="length" class="form-label">Approx. Length (chars):</label>
                          <div class="input-group input-group-sm">
                              <input  id="length" name="length" class="form-control form-control-sm" placeholder="e.g., 140">
@@ -195,10 +205,11 @@
 
                 </form>
                  <div class="button-group mt-auto border-top pt-3">
-                     <button id="clear-settings-button" class="btn btn-sm btn-outline-secondary me-2" title="Clear All Settings Inputs">Clear Settings</button>
+                     <button id="advanced-options-button" type="button" class="btn btn-sm btn-outline-info me-2" title="Configure Advanced AI Parameters">Advanced Options</button> <!-- Added Button -->
+                     <button id="clear-settings-button" class="btn btn-sm btn-outline-secondary" title="Clear All Settings Inputs">Clear Settings</button> <!-- Removed me-2 -->
                  </div>
                  <div class="api-notice small text-muted mt-2">
-                    AI generation powered by Google Gemini via backend API.
+                    AI generation powered by OpenRouter via backend API. <!-- Updated API Notice -->
                  </div>
             </aside>
         </div>
@@ -226,6 +237,67 @@
             </div>
         </div>
     </div>
+
+    <!-- Advanced Options Modal -->
+    <div class="modal fade" id="advanced-options-modal" tabindex="-1" aria-labelledby="advancedOptionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="advancedOptionsModalLabel">Advanced AI Options</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted mb-3">Adjust these settings to fine-tune the AI's response style. Changes are saved automatically.</p>
+
+                    <!-- Temperature Slider -->
+                    <div class="mb-3">
+                        <label for="adv-temperature" class="form-label">Response Creativity:</label>
+                        <span class="small text-muted">(More predictable vs. More surprising)</span>
+                        <div class="d-flex align-items-center">
+                            <input type="range" class="form-range me-2" id="adv-temperature" name="temperature" min="0.2" max="1.8" step="0.1" value="0.8">
+                            <span class="badge bg-secondary" id="adv-temperature-value" style="min-width: 40px;">0.8</span>
+                        </div>
+                    </div>
+
+                    <!-- Top P Slider -->
+                    <div class="mb-3">
+                        <label for="adv-top-p" class="form-label">Response Focus:</label>
+                        <span class="small text-muted">(Sticks to common words vs. Explores more options)</span>
+                         <div class="d-flex align-items-center">
+                            <input type="range" class="form-range me-2" id="adv-top-p" name="top_p" min="0.1" max="0.9" step="0.05" value="0.7">
+                            <span class="badge bg-secondary" id="adv-top-p-value" style="min-width: 40px;">0.7</span>
+                        </div>
+                    </div>
+
+                    <!-- Frequency Penalty Slider -->
+                    <div class="mb-3">
+                        <label for="adv-frequency-penalty" class="form-label">Topic Repetition:</label>
+                        <span class="small text-muted">(Less likely to repeat vs. More likely to repeat)</span>
+                         <div class="d-flex align-items-center">
+                            <input type="range" class="form-range me-2" id="adv-frequency-penalty" name="frequency_penalty" min="-1.0" max="1.0" step="0.1" value="0">
+                            <span class="badge bg-secondary" id="adv-frequency-penalty-value" style="min-width: 40px;">0.0</span>
+                        </div>
+                    </div>
+
+                    <!-- Presence Penalty Slider -->
+                    <div class="mb-3">
+                        <label for="adv-presence-penalty" class="form-label">New Topic Introduction:</label>
+                        <span class="small text-muted">(Less likely to introduce vs. More likely to introduce)</span>
+                         <div class="d-flex align-items-center">
+                            <input type="range" class="form-range me-2" id="adv-presence-penalty" name="presence_penalty" min="-1.0" max="1.0" step="0.1" value="0">
+                            <span class="badge bg-secondary" id="adv-presence-penalty-value" style="min-width: 40px;">0.0</span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer justify-content-between">
+                     <button type="button" id="reset-advanced-options" class="btn btn-sm btn-outline-secondary">Reset Defaults</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Advanced Options Modal -->
 
     <!-- Bootstrap Bundle JS (includes Popper) -->
     <script src="bootstrap.bundle.min.js"></script> <!-- Updated Path -->

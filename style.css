@@ -277,6 +277,16 @@ body {
 /* .message.ai { (Merged above) } */
 /* .message.ai.alert-danger { (Merged above) } */
 
+/* Timestamp Styling */
+.message-timestamp {
+    display: block; /* Ensure it appears on its own line below the message content */
+    font-size: 0.75em; /* Smaller font size */
+    color: var(--text-secondary-color); /* Dimmer text color */
+    margin-top: 5px; /* Add some space above the timestamp */
+    text-align: right; /* Align to the right within the message bubble */
+}
+
+
 
 .message.ai strong { /* For highlighting parts of AI response */
     color: var(--primary-color); /* Use primary accent for emphasis */
@@ -671,4 +681,49 @@ body.mode-email-active .common-settings-group {
 
 body.mode-sms-active .common-settings-group {
     display: block; /* Show when SMS mode is active */
+}
+/* Request Summary Message Styling */
+.message.request-summary-message {
+    font-size: 0.85em; /* Smaller font */
+    /* font-style: italic; Removed */
+    color: var(--text-color); /* White text */
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 5px 10px;
+    border-left: 4px solid #ffc107; /* Yellow border initially (processing) */
+    background-color: var(--bg-color); /* Black background (theme) */
+    transition: border-left-color 0.3s ease-in-out; /* Smooth transition for border color */
+}
+
+/* Status-specific border colors */
+.message.request-summary-message.status-completed {
+    border-left-color: var(--bs-success); /* Green border for completed */
+}
+
+.message.request-summary-message.status-failed {
+    border-left-color: #dc3545; /* Red border for failed (Bootstrap danger) */
+}
+
+/* Remove old status indicator styles */
+/* .message-status-indicator { ... } */
+/* .message-status-indicator.status-success { ... } */
+/* .message-status-indicator.status-error { ... } */
+/* Advanced Options Modal Styles */
+#advanced-options-modal .form-label {
+    font-weight: 500; /* Slightly bolder labels */
+}
+
+#advanced-options-modal .badge {
+    min-width: 45px; /* Ensure consistent width for value display */
+    text-align: center;
+}
+
+#advanced-options-modal .form-range {
+    flex-grow: 1; /* Allow range slider to take up available space */
+}
+
+#advanced-options-modal .small.text-muted {
+    display: block; /* Ensure the helper text is on its own line */
+    margin-bottom: 0.25rem;
+    font-size: 0.8em; /* Make helper text slightly smaller */
 }

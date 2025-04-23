@@ -91,8 +91,8 @@ export function handleModeChange(newMode) {
 
     // It might be cleaner if saveState handled these keys directly,
     // but mirroring the old logic for now:
-    if (currentChatDisplay) localStorage.setItem(oldHistoryKey, currentChatDisplay.innerHTML);
-    if (currentUserInput) localStorage.setItem(oldUserInputKey, currentUserInput.value);
+    // if (currentChatDisplay) localStorage.setItem(oldHistoryKey, currentChatDisplay.innerHTML); // REMOVED - History handled by cache
+    if (currentUserInput) localStorage.setItem(oldUserInputKey, currentUserInput.value); // Still save input value
     // Also trigger the main saveState function for other potential state (like settings)
     dependencies.saveState();
     // --- End Save ---
@@ -144,16 +144,12 @@ function updateUiForMode(mode, saveNewModeState) {
     const newChatDisplay = mode === 'sms' ? smsChatDisplay : emailChatDisplay;
     const newUserInput = mode === 'sms' ? smsUserInput : emailUserInput;
 
-    const savedHistory = localStorage.getItem(newHistoryKey);
-    if (savedHistory) {
-        newChatDisplay.innerHTML = savedHistory;
-    } else {
-        newChatDisplay.innerHTML = ''; // Clear if no history
-        addWelcomeMessage(newChatDisplay, mode); // Add welcome message
-    }
-    // Ensure scroll to bottom after loading history
-    newChatDisplay.scrollTop = newChatDisplay.scrollHeight;
+    // Always clear the display and add welcome message on mode switch
+    newChatDisplay.innerHTML = '';
+    addWelcomeMessage(newChatDisplay, mode);
+    newChatDisplay.scrollTop = 0; // Scroll to top of cleared display
 
+    // Load only the user input for the new mode
     const savedInput = localStorage.getItem(newUserInputKey);
     newUserInput.value = savedInput || '';
     autoResizeTextarea(newUserInput); // Resize loaded input
@@ -208,37 +204,7 @@ export function updateDynamicHeader() {
     dynamicHeader.textContent = `${modeText} Mode - ${projectAbbreviation}`;
 }
 
-/**
- * Loads chat history and user input for both modes on initial page load.
- * This ensures that switching modes immediately shows the correct saved state.
- */
-export function loadInitialModeStates() {
-    ['sms', 'email'].forEach(mode => {
-        const historyKey = `${LS_HISTORY_KEY_PREFIX}${mode}`;
-        const userInputKey = `${LS_USER_INPUT_KEY_PREFIX}${mode}`;
-        const chatDisplay = mode === 'sms' ? smsChatDisplay : emailChatDisplay;
-        const userInput = mode === 'sms' ? smsUserInput : emailUserInput;
-
-        if (!chatDisplay || !userInput) {
-            console.warn(`Cannot load initial state for ${mode}: Elements missing.`);
-            return;
-        }
-
-        const savedHistory = localStorage.getItem(historyKey);
-        if (savedHistory) {
-            chatDisplay.innerHTML = savedHistory;
-        } else {
-            chatDisplay.innerHTML = ''; // Clear if no history
-            addWelcomeMessage(chatDisplay, mode); // Add welcome message
-        }
-        chatDisplay.scrollTop = chatDisplay.scrollHeight; // Scroll to bottom
-
-        const savedInput = localStorage.getItem(userInputKey);
-        userInput.value = savedInput || '';
-        autoResizeTextarea(userInput); // Resize loaded input
-    });
-    console.log('Initial states for both modes loaded.');
-}
+// REMOVED loadInitialModeStates function - Initial loading logic is now primarily in main.js
 
 // Need a place for shared utility functions like autoResizeTextarea
 // Let's assume we create a utils.js for this.
