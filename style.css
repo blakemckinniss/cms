@@ -1,729 +1,991 @@
-/* Root Variables & Basic Body Styles - VS Code Slate Theme */
+/* Modern Dark Theme with Dark Grey and Red Accents */
 :root {
-    /* Core Theme Colors (Inspired by VS Code Default Dark) */
-    --bg-color: #231f20;         /* Editor background */
-    --sidebar-bg: #333333;     /* Activity bar / Darker sidebar areas */
-    --input-bg: #3c3c3c;         /* Input background, slightly lighter */
-    --text-color: #cccccc;       /* Default text */
-    --text-secondary-color: #9e9e9e; /* Dimmer text */
-    --primary-color: #a6192e;     /* VS Code blue accent */
-    --primary-hover-color: #c0394f; /* Lighter blue for hover */
-    --border-color: #444444;     /* Borders */
-    --hover-bg: #404040;         /* Subtle hover background */
-    --error-bg: #5a1d1d;         /* Dark red background */
-    --error-text: #f48771;       /* Lighter red text */
-    --info-bg: #3a3d41;          /* Info background (used for AI messages) */
-    --info-text: var(--text-color); /* Info text */
-    --success-color: #28a745;    /* Green for success/glow */
+    /* Core Color Palette */
+    --bg-primary: #1a1a1a;           /* Main background - very dark grey */
+    --bg-secondary: #2d2d2d;         /* Secondary background - dark grey */
+    --bg-tertiary: #3a3a3a;          /* Tertiary background - medium dark grey */
+    --bg-elevated: #404040;          /* Elevated surfaces */
+    
+    /* Red Accent Colors */
+    --red-primary: #8b2635;          /* Primary red - darker mid-tone */
+    --red-secondary: #a6192e;        /* Secondary red - slightly brighter */
+    --red-hover: #c0394f;            /* Hover state red */
+    --red-light: #d4526b;            /* Light red for highlights */
+    --red-dark: #6b1d2a;             /* Dark red for shadows */
+    
+    /* Text Colors */
+    --text-primary: #ffffff;         /* Primary text - white */
+    --text-secondary: #b8b8b8;       /* Secondary text - light grey */
+    --text-muted: #888888;           /* Muted text - medium grey */
+    --text-disabled: #555555;        /* Disabled text - dark grey */
+    
+    /* Border and Divider Colors */
+    --border-primary: #4a4a4a;       /* Primary borders */
+    --border-secondary: #3a3a3a;     /* Secondary borders */
+    --border-accent: var(--red-primary); /* Accent borders */
+    
+    /* State Colors */
+    --success: #28a745;              /* Success green */
+    --warning: #ffc107;              /* Warning yellow */
+    --danger: #dc3545;               /* Danger red */
+    --info: #6c757d;                 /* Info grey instead of ugly teal */
+    
+    /* Shadows and Effects */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+    --shadow-red: 0 4px 8px rgba(139, 38, 53, 0.3);
+    
+    /* Typography */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
 
-    --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+/* Global Styles */
+* {
+    box-sizing: border-box;
+}
 
-    /* Bootstrap Variable Overrides for VS Code Slate Theme */
-    /* Add !important to core overrides */
-    --bs-body-color: var(--text-color) !important;
-    --bs-body-bg: var(--bg-color) !important;
-    --bs-secondary-bg: var(--sidebar-bg) !important; /* Used for cards, modals, sidebars etc. */
-    --bs-border-color: var(--border-color) !important;
-    --bs-success: var(--success-color); /* Map success color */
-
-    --bs-tertiary-bg: var(--input-bg); /* Used for some component backgrounds */
-    --bs-emphasis-color: var(--text-color);
-    --bs-secondary-color: var(--text-secondary-color);
-    --bs-primary: var(--primary-color);
-    --bs-primary-rgb: 166, 25, 46;
-    --bs-link-color: var(--primary-color);
-    --bs-link-hover-color: var(--primary-hover-color);
-    --bs-code-color: #ce9178; /* VS Code orange-ish for code */
-    --bs-form-control-bg: var(--input-bg);
-    --bs-form-control-color: var(--text-color);
-    --bs-form-select-bg: var(--input-bg);
-    --bs-form-select-color: var(--text-color);
-    --bs-form-select-indicator-color: var(--text-color);
-    --bs-input-group-addon-bg: var(--sidebar-bg);
-    --bs-input-group-addon-color: var(--text-color);
-    --bs-modal-bg: var(--sidebar-bg);
-    --bs-modal-header-border-color: var(--border-color);
-    --bs-modal-footer-border-color: var(--border-color);
-    --bs-alert-color: inherit; /* Use specific alert colors below */
-    --bs-alert-bg: inherit;
-    --bs-alert-border-color: inherit;
-    --bs-alert-link-color: inherit;
-    --bs-alert-info-bg: var(--info-bg);
-    --bs-alert-info-text: var(--info-text);
-    --bs-alert-info-border-color: var(--border-color); /* Subtle border */
-    --bs-alert-danger-bg: var(--error-bg);
-    --bs-alert-danger-text: var(--error-text);
-    --bs-alert-danger-border-color: var(--error-text);
-    --bs-btn-color: #ffffff; /* White text on primary blue */
-    --bs-btn-bg: var(--primary-color);
-    --bs-btn-border-color: var(--primary-color);
-    --bs-btn-hover-color: #ffffff;
-    --bs-btn-hover-bg: var(--primary-hover-color);
-    --bs-btn-hover-border-color: var(--primary-hover-color);
-    --bs-btn-active-color: #ffffff;
-    --bs-btn-active-bg: var(--primary-hover-color);
-    --bs-btn-active-border-color: var(--primary-hover-color);
-    --bs-btn-disabled-color: #aaaaaa;
-    --bs-btn-disabled-bg: #555555;
-    --bs-btn-disabled-border-color: #555555;
-    --bs-btn-outline-secondary-color: var(--text-secondary-color);
-    --bs-btn-outline-secondary-border-color: var(--border-color);
-    --bs-btn-outline-secondary-hover-color: var(--text-color);
-    --bs-btn-outline-secondary-hover-bg: var(--hover-bg);
-    --bs-btn-outline-secondary-hover-border-color: #666666;
-    --bs-form-check-input-bg: var(--input-bg);
-    --bs-form-check-input-border: 1px solid var(--border-color);
-    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255, 255, 255, 0.25%29'/%3e%3c/svg%3e"); /* White circle for dark bg */
-    --bs-form-switch-checked-bg: var(--primary-color);
-    --bs-form-switch-checked-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+html, body {
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
 }
 
 body {
     font-family: var(--font-family);
-    /* overflow: hidden; REMOVED - Allow body scroll */
-    font-size: 14px; /* Slightly smaller base font size */
-    background-color: var(--bs-body-bg); /* Use BS variable */
-    color: var(--bs-body-color); /* Use BS variable */
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-
-/* Ensure container is flex column and takes full height */
-.container-fluid.vh-100 {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-/* Ensure row grows within the flex container */
-.row.flex-grow-1 {
-    flex-grow: 1; /* Make row fill vertical space */
-}
-/* Make columns flex containers to allow content stretching */
-.row.flex-grow-1 > [class*="col-"] {
-    display: flex;
-    flex-direction: column;
-}
-.sidebar, .main-content {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+/* Container and Layout */
+.container-fluid {
+    background-color: var(--bg-primary);
+    height: 100vh;
+    padding: 0;
+    margin: 0;
 }
 
-/* Sidebar specific styles */
+.row {
+    height: 100vh;
+    margin: 0;
+}
+
+/* Sidebar Styles */
 .sidebar {
-    height: 100vh; /* Full height FOR DESKTOP */
-    overflow-y: auto; /* Enable scroll if content overflows */
-    background-color: var(--bs-secondary-bg); /* Use BS variable */
-    /* Custom scrollbar styling */
-    scrollbar-width: thin;
-    scrollbar-color: var(--bs-border-color) var(--bs-secondary-bg);
-}
-.sidebar::-webkit-scrollbar {
-  width: 8px;
-}
-.sidebar::-webkit-scrollbar-track {
-  background: var(--bs-secondary-bg);
-  border-radius: 4px;
-}
-.sidebar::-webkit-scrollbar-thumb {
-  background-color: var(--bs-border-color);
-  border-radius: 4px;
-  border: 2px solid var(--bs-secondary-bg);
-}
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background-color: #555;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-primary);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    padding: 0.5rem;
 }
 
 .left-sidebar {
-    border-right: 1px solid var(--bs-border-color); /* DESKTOP border */
+    border-right: 1px solid var(--border-primary);
 }
 
 .right-sidebar {
-    border-left: 1px solid var(--bs-border-color); /* DESKTOP border */
+    border-left: 1px solid var(--border-primary);
+    border-right: none;
 }
 
-.right-sidebar h2 {
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--bs-border-color);
-    flex-shrink: 0; /* Prevent shrinking */
-    font-weight: 500;
+/* Main content area */
+.main-content-container {
+    height: 100vh;
+    overflow: hidden;
 }
 
-#settings-form {
-    /* Custom scrollbar styling */
-    scrollbar-width: thin;
-    scrollbar-color: var(--bs-border-color) var(--bs-secondary-bg);
-}
-#settings-form::-webkit-scrollbar {
-  width: 8px;
-}
-#settings-form::-webkit-scrollbar-track {
-  background: var(--bs-secondary-bg);
-  border-radius: 4px;
-}
-#settings-form::-webkit-scrollbar-thumb {
-  background-color: var(--bs-border-color);
-  border-radius: 4px;
-  border: 2px solid var(--bs-secondary-bg);
-}
-#settings-form::-webkit-scrollbar-thumb:hover {
-  background-color: #555;
-}
-
-
-/* Main Content (Chat) */
 .main-content {
-    position: relative; /* Needed for absolute positioning of child */
-    background-color: var(--bs-body-bg); /* Ensure main area bg */
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    flex-grow: 1; /* Ensure main content fills its column */
+    background: var(--bg-primary);
 }
 
 .chat-display {
-    flex-grow: 1; /* Allow chat display to take available space */
-    overflow-y: auto; /* Enable vertical scrolling */
-    height: 0; /* Necessary for flex-grow to work correctly with overflow FOR DESKTOP */
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Spacing between messages */
-    padding: 45px 15px 15px 15px; /* Adjust padding (top for button, L/R/B for spacing/scrollbar) */
-    /* Custom scrollbar styling for chat display */
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-color) var(--bg-color); /* Thumb color, Track color */
-}
-.chat-display::-webkit-scrollbar {
-  width: 8px;
-}
-.chat-display::-webkit-scrollbar-track {
-  background: var(--bg-color); /* Match main background */
-  border-radius: 4px;
-}
-.chat-display::-webkit-scrollbar-thumb {
-  background-color: var(--border-color); /* Use border color for thumb */
-  border-radius: 4px;
-  border: 2px solid var(--bg-color); /* Match track background */
-}
-.chat-display::-webkit-scrollbar-thumb:hover {
-  background-color: #555; /* Slightly lighter on hover */
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    background: var(--bg-primary);
 }
 
-
-.message {
-    padding: 10px 15px;
-    border-radius: 6px; /* Slightly less rounded */
-    max-width: 85%;
-    line-height: 1.5;
-    word-wrap: break-word;
-    white-space: pre-wrap; /* Preserve line breaks from AI */
+.chat-input-area {
+    flex-shrink: 0;
+    padding: 1rem;
+    border-top: 1px solid var(--border-primary);
+    background: var(--bg-secondary);
 }
 
-
-/* Copy Button Styling */
-.message.ai {
-    position: relative; /* Needed for absolute positioning of copy button */
-    padding-right: 35px; /* Make space for the button */
-    /* Ensure alert styles apply */
-    background-color: var(--bs-alert-info-bg);
-    color: var(--bs-alert-info-text);
-    border: 1px solid var(--bs-alert-info-border-color);
-    align-self: flex-start;
-    border-bottom-left-radius: 2px;
-}
-.message.ai.alert-danger { /* Error messages */
-     background-color: var(--bs-alert-danger-bg);
-     color: var(--bs-alert-danger-text);
-     border-color: var(--bs-alert-danger-border-color);
+/* Card Styles */
+.card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+    overflow: hidden;
+    margin-bottom: 0.5rem;
 }
 
-.copy-msg-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    padding: 0.1rem 0.3rem;
-    line-height: 1;
-    background-color: rgba(var(--bs-secondary-rgb), 0.2); /* Subtle background */
-    border: 1px solid rgba(var(--bs-border-color-translucent), 0.3);
-    color: var(--bs-secondary-color);
-    border-radius: 0.2rem;
-    opacity: 0.5;
-    transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out;
-    z-index: 5;
+.card-body {
+    padding: 0.5rem;
 }
 
-.copy-msg-btn:hover {
-    opacity: 1;
-    background-color: rgba(var(--bs-secondary-rgb), 0.4);
-    color: var(--bs-body-color);
-}
-
-.copy-msg-btn.copied {
-    color: var(--bs-success); /* Use Bootstrap success color */
-    opacity: 1;
-}
-
-.copy-msg-btn svg {
-    vertical-align: middle;
-}
-
-
-.message.user {
-    background-color: var(--primary-color);
-    color: #ffffff; /* White text on primary color */
-    align-self: flex-end;
-    border-bottom-right-radius: 2px;
-}
-
-/* AI messages use Bootstrap alert styles now, defined in :root */
-/* .message.ai { (Merged above) } */
-/* .message.ai.alert-danger { (Merged above) } */
-
-/* Timestamp Styling */
-.message-timestamp {
-    display: block; /* Ensure it appears on its own line below the message content */
-    font-size: 0.75em; /* Smaller font size */
-    color: var(--text-secondary-color); /* Dimmer text color */
-    margin-top: 5px; /* Add some space above the timestamp */
-    text-align: right; /* Align to the right within the message bubble */
-}
-
-
-
-.message.ai strong { /* For highlighting parts of AI response */
-    color: var(--primary-color); /* Use primary accent for emphasis */
+.card-title {
+    margin-bottom: 0.25rem;
+    font-size: var(--font-size-xs);
     font-weight: 600;
 }
 
-#user-input {
-    max-height: 150px; /* Limit growth */
-    resize: none; /* Disable manual resize */
-    overflow-y: auto; /* Add scroll if max-height reached */
+/* Form elements */
+.form-label {
+    margin-bottom: 0.125rem;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
 }
 
-#send-button svg {
-    fill: #ffffff; /* Ensure SVG fill matches button text color */
-}
-#send-button:disabled svg {
-    fill: #aaaaaa;
+.mb-2 {
+    margin-bottom: 0.25rem !important;
 }
 
-/* Top Right Clear Button */
+.mb-3 {
+    margin-bottom: 0.5rem !important;
+}
+
+/* Input groups */
+.input-group-sm .form-control,
+.input-group-sm .form-select {
+    font-size: var(--font-size-sm);
+    padding: 0.375rem 0.75rem;
+    line-height: 1.4;
+}
+
+/* Buttons */
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+}
+
+
+/* Settings form - no scrolling */
+#settings-form {
+    overflow: visible;
+    height: auto;
+}
+
+/* Alerts and tips */
+.alert {
+    padding: 0.25rem;
+    margin-bottom: 0.25rem;
+    font-size: var(--font-size-xs);
+}
+
+/* Header spacing */
+.text-center.mb-3 {
+    margin-bottom: 0.5rem !important;
+}
+
+.text-center.mb-3 h2 {
+    font-size: var(--font-size-sm);
+    margin-bottom: 0;
+}
+
+/* Compact select dropdowns */
+select {
+    font-size: var(--font-size-xs) !important;
+}
+
+select option {
+    font-size: var(--font-size-xs);
+    padding: 0.125rem;
+}
+
+/* Reduce form text size */
+.form-text {
+    font-size: 0.65rem !important;
+    margin-top: 0.125rem !important;
+}
+
+/* Hide email-only elements when in SMS mode */
+.mode-sms-active .email-only {
+    display: none !important;
+}
+
+/* Hide SMS-only elements when in email mode */
+.mode-email-active .sms-only {
+    display: none !important;
+}
+
+
+.btn-primary {
+    background-color: var(--red-primary);
+    border-color: var(--red-primary);
+    color: white !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--red-hover);
+    border-color: var(--red-hover);
+    color: white !important;
+}
+
+.btn-outline-secondary {
+    border-color: var(--border-primary);
+    color: var(--text-primary) !important;
+    background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--bg-elevated);
+    border-color: var(--red-primary);
+    color: var(--text-primary) !important;
+}
+
+.btn-outline-info {
+    border-color: var(--info);
+    color: var(--info) !important;
+    background-color: transparent;
+}
+
+.btn-outline-info:hover {
+    background-color: var(--info);
+    border-color: var(--info);
+    color: white !important;
+}
+
+/* Form control styling */
+.form-control, .form-select {
+    background-color: var(--bg-primary) !important;
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary) !important;
+    border-radius: 6px;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--bg-primary) !important;
+    border-color: var(--red-primary);
+    color: var(--text-primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(139, 38, 53, 0.25);
+}
+
+/* Fix text colors */
+.text-red {
+    color: var(--red-light) !important;
+}
+
+.text-info {
+    color: var(--info) !important;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.form-label {
+    color: var(--text-primary) !important;
+}
+
+/* Button group styling */
+.button-group {
+    margin-top: auto;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-primary);
+}
+
+.button-group .btn {
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Fix positioning issues */
 .top-right-button {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 10; /* Ensure it's above chat content */
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 10;
+    font-size: var(--font-size-xs);
+    padding: 0.25rem 0.5rem;
 }
 
-/* File Input Styles */
-.file-status {
-    margin-top: 5px;
-    font-style: italic;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    display: block; /* Ensure it takes block space */
-    color: var(--text-secondary-color); /* Use secondary text color */
-}
-.file-status.loaded {
-    font-style: normal;
-    color: var(--text-color); /* Use normal text color when loaded */
-}
-.file-status.error {
-    font-style: normal;
-    color: var(--error-text); /* Use error text color */
-    background-color: var(--error-bg); /* Subtle error background */
-    padding: 2px 4px;
-    border-radius: 3px;
-    display: inline-block; /* Prevent full width */
+.main-content {
+    position: relative;
 }
 
-/* API Key Modal Error Message */
-#modal-error-message.alert-danger {
-    /* Uses Bootstrap variables defined in :root */
-    color: var(--bs-alert-danger-text);
-    background-color: var(--bs-alert-danger-bg);
-    border-color: var(--bs-alert-danger-border-color);
+/* API notice styling */
+.api-notice {
+    font-size: 0.65rem !important;
+    color: var(--text-muted) !important;
+    opacity: 0.7;
+    text-align: center;
 }
 
-/* Ensure modal doesn't have extra padding from old styles */
-.modal-content {
-    padding: 0; /* Bootstrap handles padding in header/body/footer */
-    background-color: var(--bs-modal-bg); /* Explicitly set modal background */
-    border: 1px solid var(--bs-border-color); /* Ensure border uses variable */
+#rate-limit-status {
+    font-size: 0.65rem !important;
+    color: var(--text-muted) !important;
+    opacity: 0.7;
+    text-align: center;
 }
 
-/* Adjustments for Bootstrap components */
-.form-select-sm, .form-control-sm {
-    font-size: 0.875rem; /* Match sm input size */
+
+.card-strategy {
+    border-left: 3px solid var(--red-primary);
 }
 
+.card-tone {
+    border-left: 3px solid var(--info);
+}
+
+.card-generation {
+    border-left: 3px solid var(--success);
+}
+
+.card-info {
+    border-left: 3px solid var(--warning);
+}
+
+/* Alert styling improvements */
+.alert {
+    background-color: var(--bg-elevated) !important;
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary) !important;
+}
+
+.alert-info {
+    background-color: rgba(49, 130, 206, 0.15);
+    border: 1px solid var(--info);
+    color: var(--text-primary) !important;
+}
+
+/* Input group styling */
 .input-group .btn {
-    /* Ensure button aligns nicely with textarea */
-    height: auto; /* Let Bootstrap handle height */
+    border-left: none;
 }
 
-/* Remove focus outline if using Bootstrap's focus ring */
+/* Alert styling for dark theme */
+.alert-info {
+    background-color: rgba(49, 130, 206, 0.1);
+    border-color: var(--info);
+    color: var(--info);
+}
+
+/* Top right buttons positioning */
+.top-right-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+}
+
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.card-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Themed Cards */
+.card-strategy {
+    background: linear-gradient(135deg, var(--red-dark) 0%, var(--bg-elevated) 100%);
+    border-color: var(--red-primary);
+}
+
+.card-tone {
+    background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--red-dark) 100%);
+    border-color: var(--red-secondary);
+}
+
+.card-generation {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-elevated) 100%);
+    border-color: var(--border-primary);
+}
+
+.card-info {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    border-color: var(--info);
+    border-left: 4px solid var(--info);
+}
+
+.card-upload {
+    background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-secondary) 100%);
+    border-color: var(--warning);
+    border-left: 4px solid var(--warning);
+}
+
+/* Form Controls */
+.form-control,
+.form-select {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+    font-size: var(--font-size-sm);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--bg-elevated);
+    border-color: var(--red-primary);
+    box-shadow: 0 0 0 3px rgba(139, 38, 53, 0.2);
+    color: var(--text-primary);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.form-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: var(--font-size-sm);
+}
+
+.form-text {
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    margin-top: 0.25rem;
+}
+
+/* Input Groups */
+.input-group .btn {
+    border-color: var(--border-primary);
+}
+
+.input-group .form-control,
+.input-group .form-select {
+    border-right: none;
+}
+
+.input-group .btn:last-child {
+    border-left: none;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    border: 1px solid transparent;
+    font-size: var(--font-size-sm);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--red-primary) 0%, var(--red-secondary) 100%);
+    border-color: var(--red-primary);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-red);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--red-secondary) 0%, var(--red-hover) 100%);
+    border-color: var(--red-secondary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-outline-primary {
+    border-color: var(--red-primary);
+    color: var(--red-primary);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--red-primary);
+    border-color: var(--red-primary);
+    color: var(--text-primary);
+}
+
+.btn-outline-secondary {
+    border-color: var(--border-primary);
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--bg-elevated);
+    border-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
+.btn-outline-info {
+    border-color: var(--info);
+    color: var(--info);
+    background: transparent;
+}
+
+.btn-outline-info:hover {
+    background-color: var(--info);
+    color: var(--text-primary);
+}
+
+.btn-outline-warning {
+    border-color: var(--warning);
+    color: var(--warning);
+    background: transparent;
+}
+
+.btn-outline-warning:hover {
+    background-color: var(--warning);
+    color: var(--bg-primary);
+}
+
+/* Button Groups */
+.btn-group .btn-check:checked + .btn {
+    background: var(--red-primary);
+    border-color: var(--red-primary);
+    color: var(--text-primary);
+}
+
+/* Form Switches */
+.form-check-input {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-primary);
+}
+
+.form-check-input:checked {
+    background-color: var(--red-primary);
+    border-color: var(--red-primary);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 3px rgba(139, 38, 53, 0.2);
+}
+
+.form-check-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Chat Area */
+.main-content {
+    background-color: var(--bg-primary);
+}
+
+.chat-input-area {
+    background: var(--bg-secondary);
+    border-top: 2px solid var(--red-primary);
+    backdrop-filter: blur(10px);
+}
+
+.user-input-area {
+    background-color: var(--bg-tertiary);
+    border: 2px solid var(--border-primary);
+    color: var(--text-primary);
+    border-radius: 12px;
+    resize: none;
+    transition: all var(--transition-normal);
+}
+
+.user-input-area:focus {
+    border-color: var(--red-primary);
+    box-shadow: 0 0 0 4px rgba(139, 38, 53, 0.2);
+    background-color: var(--bg-elevated);
+}
+
+/* Messages */
+.message {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+    transition: all var(--transition-fast);
+    position: relative;
+    line-height: 1.5;
+}
+
+.message.user {
+    background: var(--red-primary);
+    border-left-color: var(--red-light);
+    margin-left: 2rem;
+    color: white;
+    font-size: var(--font-size-sm); /* Smaller user input text */
+}
+
+.message.ai {
+    background: var(--bg-elevated);
+    border-left-color: var(--info);
+    margin-right: 2rem;
+    color: var(--text-primary);
+    font-size: var(--font-size-lg); /* Larger AI response text - most important */
+}
+
+.message.request-summary {
+    background: var(--bg-tertiary);
+    border-left-color: var(--warning);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+/* Timestamp styling */
+.message-timestamp {
+    display: block;
+    font-size: 0.75rem;
+    opacity: 0.8;
+    margin-top: 0.5rem;
+    font-weight: 400;
+}
+
+.message.user .message-timestamp {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.message.ai .message-timestamp {
+    color: var(--text-muted);
+}
+
+.message.request-summary .message-timestamp {
+    color: var(--text-muted);
+}
+
+/* SMS Message Structure */
+.sms-message-content {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+    font-size: inherit; /* Inherit from parent .message.ai which is now --font-size-lg */
+    font-weight: 400; /* Normal weight for readability */
+}
+
+/* Static template URL in sidebar */
+.sms-template-url-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.sms-template-url-static {
+    flex: 1;
+    padding: 0.5rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+}
+
+/* AI Message Content Styling - Similar to template URL container */
+.ai-message-content {
+    padding: 0.75rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin-bottom: 0.5rem;
+}
+
+.copy-template-btn {
+    padding: 0.375rem 0.5rem;
+    background: transparent;
+    border: 1px solid var(--border-primary);
+    color: var(--text-muted);
+    border-radius: 4px;
+    transition: all var(--transition-fast);
+}
+
+.copy-template-btn:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--red-primary);
+}
+
+.copy-template-btn.copied {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+}
+
+.sms-char-count {
+    font-size: var(--font-size-sm); /* Increased from 0.75rem to 0.875rem */
+    opacity: 1; /* Full opacity for better visibility */
+    font-weight: 600; /* Bolder weight for importance */
+    margin-bottom: 0.5rem;
+    color: var(--text-primary); /* Ensure good contrast */
+}
+
+/* Copy Buttons Container */
+.copy-buttons-container {
+    display: flex;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+.copy-msg-only-btn,
+.copy-with-template-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    transition: all var(--transition-fast);
+}
+
+.copy-msg-only-btn:hover,
+.copy-with-template-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.copy-msg-only-btn.copied,
+.copy-with-template-btn.copied {
+    background: var(--success);
+    border-color: var(--success);
+}
+
+/* Regular copy button styling */
+.copy-msg-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem;
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    color: var(--text-muted);
+    transition: all var(--transition-fast);
+}
+
+.copy-msg-btn:hover {
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--text-primary);
+}
+
+.copy-msg-btn.copied {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+}
+
+/* Alerts */
+.alert {
+    border-radius: 12px;
+    border: 1px solid transparent;
+    backdrop-filter: blur(10px);
+}
+
+.alert-info {
+    background: linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, var(--bg-elevated) 100%);
+    border-color: var(--info);
+    color: var(--text-primary);
+}
+
+.alert-success {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, var(--bg-elevated) 100%);
+    border-color: var(--success);
+    color: var(--text-primary);
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, var(--bg-elevated) 100%);
+    border-color: var(--warning);
+    color: var(--text-primary);
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, var(--bg-elevated) 100%);
+    border-color: var(--danger);
+    color: var(--text-primary);
+}
+
+/* Glow Effect */
+.input-active-glow {
+    box-shadow: 0 0 0 3px rgba(139, 38, 53, 0.3) !important;
+    border-color: var(--red-primary) !important;
+    background-color: var(--bg-elevated) !important;
+}
+
+/* Spinners */
+.spinner-border {
+    color: var(--red-primary);
+}
+
+/* Clear Buttons */
+.clear-input-btn {
+    background: var(--bg-tertiary);
+    border-color: var(--border-primary);
+    color: var(--text-muted);
+    transition: all var(--transition-fast);
+}
+
+.clear-input-btn:hover {
+    background: var(--red-primary);
+    border-color: var(--red-primary);
+    color: var(--text-primary);
+}
+
+/* Top Right Buttons */
+.top-right-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    background: rgba(45, 45, 45, 0.9);
+    border: 1px solid var(--border-primary);
+}
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Links */
+a {
+    color: var(--red-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--red-hover);
+}
+
+/* Modals */
+.modal-content {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-primary);
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-primary);
+    background: var(--bg-tertiary);
+}
+
+.modal-title {
+    color: var(--text-primary);
+}
+
+/* File Upload Styling */
+.file-input-label-button {
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.file-input-label-button:hover {
+    transform: translateY(-1px);
+}
+
+/* Rate Limit Status */
+#rate-limit-status {
+    background: var(--bg-elevated);
+    border-radius: 8px;
+    padding: 0.5rem;
+    border-left: 3px solid var(--info);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        border-radius: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .chat-display {
+        margin: 0.5rem;
+        padding: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--red-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--red-hover);
+}
+
+/* Selection Styling */
+::selection {
+    background: var(--red-primary);
+    color: var(--text-primary);
+}
+
+/* Focus Outline */
 *:focus {
     outline: none;
 }
 
-/* Ensure Bootstrap focus ring uses primary color */
-.form-control:focus, .form-select:focus, .btn:focus {
-  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.35); /* Slightly more visible focus */
-  border-color: var(--primary-color) !important; /* Ensure border color changes too, use !important if needed */
-}
-.form-check-input:focus {
-  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.35);
-  border-color: var(--primary-color) !important; /* Ensure border color changes too, use !important if needed */
-}
-.form-check-input:checked {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+/* Animation Classes */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* Custom styling for the "Generating..." message */
-.alert[role="status"] {
-    background-color: var(--bs-tertiary-bg); /* Use input background */
-    color: var(--bs-secondary-color); /* Use secondary text color */
-    border-color: var(--bs-border-color);
+.fade-in {
+    animation: fadeIn var(--transition-normal);
 }
 
-
-/* Force primary button color */
-.btn-primary {
-    background-color: var(--primary-color) !important;
-    border-color: var(--primary-color) !important;
-    color: #ffffff !important; /* Ensure text remains white */
+/* Utility Classes */
+.text-red {
+    color: var(--red-primary) !important;
 }
 
-.btn-primary:hover,
-.btn-primary:focus,
-.btn-primary:active {
-    background-color: var(--primary-hover-color) !important;
-    border-color: var(--primary-hover-color) !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.5) !important; /* Adjust focus shadow if needed */
+.bg-red {
+    background-color: var(--red-primary) !important;
 }
 
-/* --- Specific Overrides (Place at the end) --- */
-
-/* Ensure sidebar background color overrides .bg-light */
-.sidebar.bg-light {
-    background-color: var(--bs-secondary-bg) !important;
+.border-red {
+    border-color: var(--red-primary) !important;
 }
 
-/* Ensure chat input area background and prevent shrinking */
-.chat-input-area { /* General selector for input area */
-    flex-shrink: 0; /* Prevent input area from shrinking */
-}
-.chat-input-area.bg-light { /* Specific background override */
-     background-color: var(--bs-secondary-bg) !important;
-     border-top: 1px solid var(--bs-border-color) !important;
-}
-
-/* Ensure modal header/footer background */
-.modal-header, .modal-footer {
-    background-color: var(--bs-modal-bg); /* Use modal bg variable */
-    border-color: var(--bs-border-color); /* Use border variable */
-}
-.modal-header {
-    border-bottom: 1px solid var(--bs-border-color);
-}
-.modal-footer {
-    border-top: 1px solid var(--bs-border-color);
-}
-
-/* Ensure form labels use correct color */
-label, .form-label, .form-check-label {
-    color: var(--bs-body-color);
-}
-
-
-/* Styles for input wrappers and clear buttons */
-.input-wrapper {
-    /* This class is now only used for the switch */
-    position: relative;
-}
-
-/* General style for clear buttons (used by JS selector) */
-.clear-input-btn {
-    opacity: 0.6; /* Slightly more visible by default */
-    transition: opacity 0.2s ease-in-out;
-    /* Use Bootstrap button padding/sizing via btn-sm */
-    /* Ensure vertical alignment if needed */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    /* Make the 'x' slightly bolder */
-    font-weight: 500;
-}
-
-/* Style for buttons within input groups */
-.input-group > .clear-input-btn.btn-outline-secondary {
-    /* Bootstrap handles most styling here */
-    /* Override border if needed, but outline-secondary should work */
-    border-left: 0; /* Remove left border added by input-group */
-    font-size: 1rem; /* Adjust size of 'x' if needed */
-    padding: 0 0.5rem; /* Adjust padding */
-    /* Ensure it doesn't get focus ring */
-    box-shadow: none !important;
-}
-
-.input-group {
-    padding-left: 5px;
-}
-
-.clear-input-btn:hover,
-.clear-input-btn:focus {
-    opacity: 1; /* Fully visible on hover/focus */
-    box-shadow: none !important; /* Remove Bootstrap focus shadow */
-}
-
-/* Specific adjustment for the switch clear button (still absolute) */
-.clear-switch-btn {
-    position: absolute;
-    top: 5px; /* Align differently for switches */
-    right: -5px; /* Adjust horizontal position */
-    padding: 0.1rem 0.3rem; /* Smaller padding for btn-close */
-    line-height: 1;
-    font-size: 0.7rem; /* Smaller font size for the 'x' */
-    background-color: transparent;
-    border: none;
-    z-index: 5; /* Ensure it's above the input */
-    /* Inherit opacity/transition from .clear-input-btn */
-}
-
-/* Hide clear button if input is empty/default (handled by JS potentially, but good fallback) */
-/* Example: input:placeholder-shown + .clear-input-btn { display: none; } */
-
-
-/* Hide number input spinners (arrows) */
-input[type='number']::-webkit-outer-spin-button,
-input[type='number']::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-input[type='number'] {
-    -moz-appearance: textfield; /* Firefox */
-}
-
-/* File Input Customization */
-.file-group {
-    position: relative;
-    /* Adjust margin/padding as needed */
-}
-
-/* Hide the default file input visually */
-.file-group input[type="file"] {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-/* Style the custom label button */
-.file-input-label-button {
-    display: inline-block;
-    padding: 0.25rem 0.5rem; /* Smaller padding */
-    font-size: 0.875rem; /* Match sm button size */
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--bs-btn-outline-secondary-color);
-    text-align: center;
-    text-decoration: none;
-    vertical-align: middle;
-    cursor: pointer;
-    user-select: none;
-    background-color: transparent;
-    border: 1px solid var(--bs-btn-outline-secondary-border-color);
-    border-radius: 0.25rem;
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    margin-bottom: 4px; /* Space between button and status */
-}
-
-.file-input-label-button:hover {
-    color: var(--bs-btn-outline-secondary-hover-color);
-    background-color: var(--bs-btn-outline-secondary-hover-bg);
-    border-color: var(--bs-btn-outline-secondary-hover-border-color);
-}
-
-/* Ensure the label text is not italic */
-.file-group .form-label {
-    font-style: normal;
-    margin-bottom: 0.25rem; /* Reduce space below label */
-}
-
-/* Mode Specific Visibility */
-.sms-only,
-.email-only {
-    display: none; /* Hide by default */
-}
-
-body.mode-sms-active .sms-only {
-    display: block; /* Show SMS elements when SMS mode is active */
-}
-/* Handle inline elements like spans correctly */
-body.mode-sms-active .sms-only[style*="display: inline"],
-body.mode-sms-active .sms-only.d-inline,
-body.mode-sms-active .sms-only.d-inline-block {
-    display: inline-block; /* Or inline, depending on original style */
-}
-
-
-body.mode-email-active .email-only {
-    display: block; /* Show Email elements when Email mode is active */
-}
-/* Handle inline elements like spans correctly */
-body.mode-email-active .email-only[style*="display: inline"],
-body.mode-email-active .email-only.d-inline,
-body.mode-email-active .email-only.d-inline-block {
-    display: inline-block; /* Or inline, depending on original style */
-}
-
-/* Ensure hr elements are displayed correctly */
-body.mode-sms-active hr.sms-only,
-body.mode-email-active hr.email-only {
-    display: block;
-}
-
-/* Glow effect for active/non-default settings */
-.input-active-glow {
-    box-shadow: 0 0 0 0.2rem rgba(var(--bs-success-rgb), 0.4); /* Green glow */
-    border-color: var(--bs-success) !important; /* Green border */
-}
-/* Ensure focus style overrides glow */
-.input-active-glow:focus {
-    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.35) !important; /* Primary focus */
-    border-color: var(--primary-color) !important;
-}
-
-/* Style for <pre> tags inside AI messages (for email body) */
-.message.ai pre.email-body {
-    background-color: rgba(0, 0, 0, 0.1); /* Slightly darker background */
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-family: var(--bs-font-monospace); /* Use monospace font */
-    font-size: 0.9em; /* Slightly smaller font */
-    color: inherit; /* Inherit color from parent */
-    white-space: pre-wrap; /* Ensure wrapping */
-    word-wrap: break-word;
-    margin-top: 5px;
-    border: 1px solid rgba(var(--bs-border-color-translucent), 0.2);
-}
-
-/* Style for variations within email messages */
-.email-variation {
-    margin-bottom: 1rem; /* Space below each variation */
-}
-.email-variation:last-child {
-    margin-bottom: 0; /* No space after the last one */
-}
-
-/* Style for hr within email variations */
-.email-variation hr {
-    border-top: 1px solid rgba(var(--bs-border-color-translucent), 0.3);
-}
-
-
-/* Dynamic Header Styles */
-#dynamic-header {
-    padding: 0.75rem 1rem; /* Add some padding */
-    background-color: var(--sidebar-bg); /* Use sidebar background for consistency */
-    border-bottom: 1px solid var(--border-color); /* Subtle separator */
-    color: var(--text-color);
-    font-family: 'Amatic SC', cursive; /* Apply new font */
-    font-size: 2.8rem; /* Adjusted size for Amatic SC */
-    font-weight: 700; /* Bold weight */
-    flex-shrink: 0; /* Prevent shrinking in flex layouts */
-    text-align: center; /* Center the text */
-}
-
-/* Responsive adjustments */
-@media (max-width: 767.98px) {
-    .sidebar {
-        height: auto; /* Allow sidebar height to adjust on mobile */
-        max-height: 40vh; /* Limit height on mobile */
-        overflow-y: auto; /* Ensure scrolling if needed */
-    }
-    .left-sidebar {
-        border-right: none; /* Remove right border */
-        border-bottom: 1px solid var(--bs-border-color); /* Add bottom border */
-    }
-    .right-sidebar {
-        border-left: none; /* Remove left border */
-        border-top: 1px solid var(--bs-border-color); /* Add top border */
-    }
-    .main-content {
-        height: auto; /* Allow main content height to adjust */
-        flex-grow: 1; /* Ensure it takes remaining space */
-    }
-    .chat-display {
-        height: auto; /* Remove fixed height calculation */
-        flex-grow: 1; /* Allow chat to grow */
-        padding-top: 45px; /* Keep space for buttons */
-    }
-    .message {
-        max-width: 95%; /* Allow messages to be slightly wider */
-    }
-}
-
-/* Mode-specific visibility for common settings */
-body.mode-email-active .common-settings-group {
-    display: none;
-}
-
-body.mode-sms-active .common-settings-group {
-    display: block; /* Show when SMS mode is active */
-}
-/* Request Summary Message Styling */
-.message.request-summary-message {
-    font-size: 0.85em; /* Smaller font */
-    /* font-style: italic; Removed */
-    color: var(--text-color); /* White text */
-    margin-top: 5px;
-    margin-bottom: 5px;
-    padding: 5px 10px;
-    border-left: 4px solid #ffc107; /* Yellow border initially (processing) */
-    background-color: var(--bg-color); /* Black background (theme) */
-    transition: border-left-color 0.3s ease-in-out; /* Smooth transition for border color */
-}
-
-/* Status-specific border colors */
-.message.request-summary-message.status-completed {
-    border-left-color: var(--bs-success); /* Green border for completed */
-}
-
-.message.request-summary-message.status-failed {
-    border-left-color: #dc3545; /* Red border for failed (Bootstrap danger) */
-}
-
-/* Remove old status indicator styles */
-/* .message-status-indicator { ... } */
-/* .message-status-indicator.status-success { ... } */
-/* .message-status-indicator.status-error { ... } */
-/* Advanced Options Modal Styles */
-#advanced-options-modal .form-label {
-    font-weight: 500; /* Slightly bolder labels */
-}
-
-#advanced-options-modal .badge {
-    min-width: 45px; /* Ensure consistent width for value display */
-    text-align: center;
-}
-
-#advanced-options-modal .form-range {
-    flex-grow: 1; /* Allow range slider to take up available space */
-}
-
-#advanced-options-modal .small.text-muted {
-    display: block; /* Ensure the helper text is on its own line */
-    margin-bottom: 0.25rem;
-    font-size: 0.8em; /* Make helper text slightly smaller */
+.shadow-red {
+    box-shadow: var(--shadow-red) !important;
 }

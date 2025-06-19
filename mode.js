@@ -3,6 +3,7 @@
 
 import { autoResizeTextarea } from './utils.js'; // Assuming utils.js exists or will be created for shared functions
 import { updateAllSettingsGlows, storeDefaultSettings } from './settings.js'; // Need these for UI updates on mode switch
+import { addWelcomeMessage } from './chat.js'; // Import the welcome message function
 
 // --- Constants ---
 const LS_MODE_KEY = 'smsGenMode';
@@ -15,7 +16,7 @@ let dependencies = {}; // To hold functions/elements passed from main.js
 
 // --- DOM Elements (Cached) ---
 let smsChatArea, emailChatArea, smsChatDisplay, emailChatDisplay, smsUserInput, emailUserInput;
-let modeSmsRadio, modeEmailRadio, projectSelect, dynamicHeader;
+let modeSmsRadio, modeEmailRadio, projectSelect;
 
 /**
  * Initializes the mode module, caches DOM elements, and sets the initial mode.
@@ -37,9 +38,8 @@ export function initializeMode(config) {
     modeSmsRadio = document.getElementById('mode-sms');
     modeEmailRadio = document.getElementById('mode-email');
     projectSelect = document.getElementById('project');
-    dynamicHeader = document.getElementById('dynamic-header');
 
-    if (!smsChatArea || !emailChatArea || !smsChatDisplay || !emailChatDisplay || !smsUserInput || !emailUserInput || !modeSmsRadio || !modeEmailRadio || !projectSelect || !dynamicHeader) {
+    if (!smsChatArea || !emailChatArea || !smsChatDisplay || !emailChatDisplay || !smsUserInput || !emailUserInput || !modeSmsRadio || !modeEmailRadio || !projectSelect) {
         console.error("Mode Initialization Error: One or more required DOM elements not found.");
         // Optionally, inform the user via UI
         dependencies.addMessage?.('ai', 'Error: Critical UI elements for mode switching are missing. Please reload.');
@@ -57,8 +57,7 @@ export function initializeMode(config) {
     modeSmsRadio.addEventListener('change', () => handleModeChange('sms'));
     modeEmailRadio.addEventListener('change', () => handleModeChange('email'));
 
-    // Add listener for project changes to update header
-    projectSelect.addEventListener('change', updateDynamicHeader);
+    // Project change listener removed (no dynamic header)
 
     console.log(`Mode module initialized. Current mode: ${currentMode}`);
 }
@@ -159,8 +158,7 @@ function updateUiForMode(mode, saveNewModeState) {
     if (mode === 'sms' && modeSmsRadio) modeSmsRadio.checked = true;
     if (mode === 'email' && modeEmailRadio) modeEmailRadio.checked = true;
 
-    // Update the dynamic header
-    updateDynamicHeader();
+    // Dynamic header removed
 
     // Save the newly activated mode
     if (saveNewModeState) {
@@ -175,34 +173,7 @@ function updateUiForMode(mode, saveNewModeState) {
  * @param {HTMLElement} displayElement - The chat display element.
  * @param {string} mode - The mode ('sms' or 'email') for the welcome message.
  */
-function addWelcomeMessage(displayElement, mode) {
-    if (!displayElement) return;
-    const welcomeDiv = document.createElement('div');
-    welcomeDiv.classList.add('message', 'ai', 'alert', 'alert-info');
-    welcomeDiv.setAttribute('role', 'alert');
-    welcomeDiv.textContent = `Welcome to ${mode === 'sms' ? 'SMS' : 'Email'} mode! Select a project and type your request below, or use the settings on the right.`;
-    displayElement.appendChild(welcomeDiv);
-}
 
-/**
- * Updates the dynamic header text based on the current mode and project.
- */
-export function updateDynamicHeader() {
-    if (!dynamicHeader || !projectSelect) return; // Safety check
-    const modeText = currentMode.toUpperCase();
-    const projectValue = projectSelect.value;
-    let projectAbbreviation = projectValue; // Default to full name if no match
-
-    // Consider making this mapping data-driven or configurable if projects change often
-    const projectAbbreviations = {
-        "Bahama Breeze": "BB",
-        "Cheddars": "CSK", // Assuming 'Cheddars' is the value in the select
-        "Yardhouse": "YH"  // Assuming 'Yardhouse' is the value
-    };
-    projectAbbreviation = projectAbbreviations[projectValue] || projectValue;
-
-    dynamicHeader.textContent = `${modeText} Mode - ${projectAbbreviation}`;
-}
 
 // REMOVED loadInitialModeStates function - Initial loading logic is now primarily in main.js
 

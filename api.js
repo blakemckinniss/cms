@@ -116,6 +116,7 @@ export async function generateContent(params) {
                 if (errorData && errorData.error) {
                     if (res.status === 401) errorMsg = "Invalid or unauthorized API Key. Please refresh the page.";
                     else if (res.status === 403) errorMsg = `Access Denied. (${errorData.error || 'Please ensure you are accessing from an allowed location.'})`;
+                    else if (res.status === 429) errorMsg = `Rate limit exceeded. ${errorData.message || 'Please wait before making another request.'}`;
                     else errorMsg = errorData.error;
                 }
             } catch { /* ignore */ }

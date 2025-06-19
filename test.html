@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Generator Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; }
+        button { padding: 10px 20px; margin: 5px; }
+        .result { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .char-count { font-size: 0.9em; color: #666; }
+        .warning { color: orange; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SMS Generator Test</h1>
+        
+        <div>
+            <label for="prompt">Enter your SMS request:</label>
+            <textarea id="prompt" placeholder="Type your SMS request (e.g., 'Generate 3 variations for a weekend special')"></textarea>
+        </div>
+        
+        <div>
+            <label for="num-results">Number of Results:</label>
+            <input type="number" id="num-results" value="1" min="1" max="5">
+        </div>
+        
+        <div>
+            <label>
+                <input type="checkbox" id="use-emojis"> Use Emojis
+            </label>
+        </div>
+        
+        <button onclick="generateSMS()">Generate SMS</button>
+        <button onclick="clearResults()">Clear Results</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const promptTextarea = document.getElementById('prompt');
+        const resultsDiv = document.getElementById('results');
+
+        async function generateSMS() {
+            const prompt = promptTextarea.value.trim();
+            const numResults = parseInt(document.getElementById('num-results').value) || 1;
+            const useEmojis = document.getElementById('use-emojis').checked;
+            
+            if (!prompt) {
+                alert('Please enter a prompt');
+                return;
+            }
+
+            resultsDiv.innerHTML = '<div class="result">Generating...</div>';
+
+            try {
+                // Make multiple API calls as requested
+                for (let i = 0; i < numResults; i++) {
+                    const response = await fetch('http://localhost:3001/api/generate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            userPrompt: prompt,
+                            settings: {
+                                mode: 'sms',
+                                project: 'Test Project',
+                                use_emojis: useEmojis,
+                                num_results: 1
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'result';
+                        const charCount = data.result ? data.result.length : 0;
+                        resultDiv.innerHTML = `
+                            <strong>Result ${i + 1}:</strong><br>
+                            ${data.result || 'No result'}<br>
+                            <small class="char-count">${charCount} characters</small>
+                        `;
+                        
+                        if (i === 0) resultsDiv.innerHTML = ''; // Clear "Generating..." on first result
+                        resultsDiv.appendChild(resultDiv);
+                    } else {
+                        const error = await response.text();
+                        resultsDiv.innerHTML += `<div class="result error">Error for result ${i + 1}: ${error}</div>`;
+                    }
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="result error">Network error: ${error.message}</div>`;
+            }
+        }
+
+        function clearResults() {
+            resultsDiv.innerHTML = '';
+        }
+    </script>
+</body>
+</html>

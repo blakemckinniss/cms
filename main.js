@@ -47,10 +47,27 @@ function connectWebSocket() {
             }
 
             if (data.type === 'sms') {
-                // Add character count as superscript, render as raw HTML, insert before spinner
-                const charCount = data.sms.length;
-                const msgWithCount = `${data.sms} <sup style="font-size:0.8em;color:#888;">${charCount}</sup>`;
-                addMessageToChat('ai', msgWithCount, false, { asHtml: true, insertBeforeSpinner: true });
+                // Parse SMS to separate message from template URL
+                const smsText = data.sms;
+                const urlMatch = smsText.match(/(.*?)(>>> https?:\/\/[^\s]+)$/);
+                
+                let messageOnly, charCount;
+                if (urlMatch) {
+                    messageOnly = urlMatch[1].trim();
+                    charCount = messageOnly.length;
+                } else {
+                    messageOnly = smsText;
+                    charCount = smsText.length;
+                }
+                
+                // Create formatted message without template URL
+                const formattedMessage = `<div class="sms-message-content">${messageOnly}</div><div class="sms-char-count">${charCount} chars</div>`;
+                
+                addMessageToChat('ai', formattedMessage, false, {
+                    asHtml: true,
+                    insertBeforeSpinner: true,
+                    messageOnly: messageOnly
+                });
             } else if (data.type === 'progress') {
                 // Show spinner if not already shown
                 if (!streamingInProgress) {
@@ -100,6 +117,12 @@ function connectWebSocket() {
                 if (chatDisplay) {
                     chatDisplay.querySelectorAll('.validation-failure-msg').forEach(el => el.remove());
                 }
+                // Remove request summary messages when generation is complete
+                const currentMode = getCurrentMode();
+                const targetChatDisplay = currentMode === 'sms' ? getSmsChatDisplay() : getEmailChatDisplay();
+                if (targetChatDisplay) {
+                    removeRequestSummaryMessages(targetChatDisplay);
+                }
                 // Update summary status if element found
                 if (summaryElement) {
                     // Pass null for count; chat.js function will try to infer from original text
@@ -123,11 +146,11 @@ import { initializeModal, configureModal, handleModalInputKeydown } from './moda
 import { generateContent, LOCALSTORAGE_API_KEY_NAME, validateApiKey } from './api.js'; // Added validateApiKey
 import {
     initializeChat, configureChat, addMessageToChat, clearHistory, downloadAiHistory, updateChatMessageStatus,
-    loadMessageHistory, clearMessageHistoryCache, displayHistoryMessages, updateHistoryButtonVisibility, addWelcomeMessage // Added history cache functions
+    loadMessageHistory, clearMessageHistoryCache, displayHistoryMessages, updateHistoryButtonVisibility, addWelcomeMessage, removeWelcomeMessage, removeRequestSummaryMessages // Added history cache functions
 } from './chat.js';
 import { initializeFileHandlers, configureFileHandlers, handleFileUpload, getMarketingData, getSmsData, clearFiles } from './file.js'; // Added clearFiles
 import { initializeSettings, configureSettings, getSettings, clearSettings, clearProject, updateAllSettingsGlows, storeDefaultSettings } from './settings.js'; // Added clear functions, glow/store
-import { initializeMode, getCurrentMode, updateDynamicHeader } from './mode.js'; // Removed originalLoadInitialModeStates
+import { initializeMode, getCurrentMode } from './mode.js'; // Removed originalLoadInitialModeStates
 import { autoResizeTextarea, debounce } from './utils.js'; // Added utils
 
 // SVG icon for copy button (used in chat.js)
@@ -147,6 +170,13 @@ function getEmailChatDisplay() {
 
 function getCopyIconSVG() {
     return copyIconSVG;
+}
+
+// SVG icon for check/success state
+const checkIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/></svg>`;
+
+function getCheckIconSVG() {
+    return checkIconSVG;
 }
 
 // --- Local Storage Constants ---
@@ -266,6 +296,14 @@ import { showApiKeyModal } from './modal.js';
 // Removed duplicate import of validateApiKey here
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Rate limiting variables - must be declared early
+    const RATE_LIMIT = {
+        maxRequests: 3,
+        windowMs: 60 * 1000, // 1 minute
+        blockDurationMs: 2 * 60 * 1000 // 2 minutes
+    };
+    let requestTimestamps = JSON.parse(localStorage.getItem('apiRequestTimestamps') || '[]');
+
     initializeModal();
     // Initialize core modules first
     // initializeModal(); // Removed duplicate call
@@ -291,7 +329,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             showApiKeyModal();
         } else {
             // If key exists, still update header and glows based on loaded mode
-            updateDynamicHeader();
         storeDefaultSettings(); // Ensure defaults are stored for the loaded mode
         updateAllSettingsGlows();
     }
@@ -304,6 +341,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         getSmsChatDisplay,
         getEmailChatDisplay,
         getCopyIconSVG,
+        getCheckIconSVG,
         saveState: saveStateToLocalStorage,
         getProjectSelect: getProjectSelect, // Pass project select for download filename
         getSmsMessageHistoryButton: getSmsMessageHistoryButton, // Pass history button getter
@@ -346,8 +384,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Welcome messages are added by initializeMode if needed.
     // History button visibility is handled by initializeChat.
 
-    // Update header AFTER mode and project are potentially loaded
-    updateDynamicHeader();
+    // Mode and project loaded
+
+    // Update rate limit status on page load
+    updateRateLimitStatus();
 
     // Resize textareas after potentially loading content
     autoResizeTextarea(document.getElementById('sms-user-input'));
@@ -381,8 +421,93 @@ document.addEventListener('DOMContentLoaded', async () => {
     const smsSendButton = document.getElementById('sms-send-button');
     const emailSendButton = document.getElementById('email-send-button');
 
+    // Function to check and enforce rate limiting
+    function checkRateLimit() {
+        const now = Date.now();
+        
+        // Remove old timestamps outside the window
+        requestTimestamps = requestTimestamps.filter(timestamp =>
+            now - timestamp < RATE_LIMIT.windowMs + RATE_LIMIT.blockDurationMs
+        );
+        
+        // Check if we're currently blocked
+        const recentRequests = requestTimestamps.filter(timestamp =>
+            now - timestamp < RATE_LIMIT.windowMs
+        );
+        
+        if (recentRequests.length >= RATE_LIMIT.maxRequests) {
+            const oldestRecentRequest = Math.min(...recentRequests);
+            const blockUntil = oldestRecentRequest + RATE_LIMIT.blockDurationMs;
+            
+            if (now < blockUntil) {
+                const waitTime = Math.ceil((blockUntil - now) / 1000);
+                return { blocked: true, waitTime };
+            }
+        }
+        
+        return { blocked: false };
+    }
+
+    // Function to record a new request
+    function recordRequest() {
+        const now = Date.now();
+        requestTimestamps.push(now);
+        localStorage.setItem('apiRequestTimestamps', JSON.stringify(requestTimestamps));
+    }
+
+    // Function to show rate limit warning
+    function showRateLimitWarning(waitTime) {
+        const minutes = Math.floor(waitTime / 60);
+        const seconds = waitTime % 60;
+        const timeString = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+        
+        alert(`⚠️ Rate Limit Exceeded\n\nYou've made too many requests recently. To control API costs, please wait ${timeString} before making another request.\n\nLimit: ${RATE_LIMIT.maxRequests} requests per minute`);
+        
+        // Update status indicator
+        updateRateLimitStatus();
+    }
+
+    // Function to update rate limit status indicator
+    function updateRateLimitStatus() {
+        const statusElement = document.getElementById('rate-limit-status');
+        if (!statusElement) return;
+
+        const rateLimitCheck = checkRateLimit();
+        const now = Date.now();
+        const recentRequests = requestTimestamps.filter(timestamp =>
+            now - timestamp < RATE_LIMIT.windowMs
+        );
+
+        if (rateLimitCheck.blocked) {
+            const minutes = Math.floor(rateLimitCheck.waitTime / 60);
+            const seconds = rateLimitCheck.waitTime % 60;
+            const timeString = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+            
+            statusElement.innerHTML = `<span class="text-danger">⚠</span> Rate limited: wait ${timeString}`;
+            statusElement.className = 'small text-danger mt-1';
+            statusElement.style.display = 'block';
+        } else if (recentRequests.length >= RATE_LIMIT.maxRequests - 1) {
+            statusElement.innerHTML = `<span class="text-warning">⚠</span> Rate limit: ${recentRequests.length}/${RATE_LIMIT.maxRequests} requests used`;
+            statusElement.className = 'small text-warning mt-1';
+            statusElement.style.display = 'block';
+        } else if (recentRequests.length > 0) {
+            statusElement.innerHTML = `<span class="text-info">ℹ</span> Rate limit: ${recentRequests.length}/${RATE_LIMIT.maxRequests} requests used`;
+            statusElement.className = 'small text-muted mt-1';
+            statusElement.style.display = 'block';
+        } else {
+            statusElement.style.display = 'none';
+        }
+    }
+
     // Generic function to handle sending for either mode
     async function handleSendMessage() {
+        // Check rate limit first
+        const rateLimitCheck = checkRateLimit();
+        if (rateLimitCheck.blocked) {
+            showRateLimitWarning(rateLimitCheck.waitTime);
+            return;
+        }
+
         const mode = getCurrentMode();
         const userInputElement = mode === 'sms' ? smsUserInput : emailUserInput;
         const sendButtonElement = mode === 'sms' ? smsSendButton : emailSendButton;
@@ -393,59 +518,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const marketingData = getMarketingData(); // Only relevant for SMS, but harmless to include
         const smsData = getSmsData(); // Only relevant for SMS
 
-        // --- Custom Num Results Logic for SMS Mode ---
-        if (mode === 'sms') {
-            const numResultsInput = getNumResultsInput(); // Get the input element
-            const isNumResultsEdited = numResultsInput?.classList.contains('input-active-glow'); // Check if edited
-
-            if (isNumResultsEdited) {
-                // If edited, add a note that the sidebar value takes priority
-                addMessageToChat(
-                    'ai', // Or 'system' if you prefer
-                    `<small><i>Note: Using the # Results value (${settings.num_results}) from the sidebar as it was manually set.</i></small>`,
-                    false, // Not a spinner
-                    { asHtml: true, insertBeforeSpinner: true } // Display subtly before results stream
-                );
-            } else if (prompt) {
-                // If not edited, try to extract number 1-20 from the prompt
-                const match = prompt.match(/\b([1-9]|1[0-9]|20)\b/); // Find first number 1-20
-                if (match && match[1]) {
-                    const numFromPrompt = parseInt(match[1], 10);
-                    if (!isNaN(numFromPrompt)) {
-                        console.log(`Overriding num_results with ${numFromPrompt} from prompt.`);
-                        settings.num_results = numFromPrompt; // Override the setting
-                        // Optionally add a message indicating the override?
-                        // addMessageToChat('ai', `<small><i>Using ${numFromPrompt} results based on your message.</i></small>`, false, { asHtml: true, insertBeforeSpinner: true });
-                    }
-                }
-            }
-        } else if (mode === 'email') { // Add similar logic for email
-            const numResultsInput = getNumResultsInput(); // Get the input element
-            const isNumResultsEdited = numResultsInput?.classList.contains('input-active-glow'); // Check if edited
-
-            if (isNumResultsEdited) {
-                // If edited, add a note that the sidebar value takes priority
-                addMessageToChat(
-                    'ai',
-                    `<small><i>Note: Using the # Results value (${settings.num_results}) from the sidebar as it was manually set.</i></small>`,
-                    false,
-                    { asHtml: true, insertBeforeSpinner: true }
-                );
-            } else if (prompt) {
-                // If not edited, try to extract number 1-20 from the prompt
-                const match = prompt.match(/\b([1-9]|1[0-9]|20)\b/); // Find first number 1-20
-                if (match && match[1]) {
-                    const numFromPrompt = parseInt(match[1], 10);
-                    if (!isNaN(numFromPrompt)) {
-                        console.log(`Overriding num_results with ${numFromPrompt} from prompt for email.`);
-                        settings.num_results = numFromPrompt; // Override the setting
-                        // Optionally add a message indicating the override
-                        addMessageToChat('ai', `<small><i>Using ${numFromPrompt} results based on your message.</i></small>`, false, { asHtml: true, insertBeforeSpinner: true });
-                    }
-                }
-            }
-        }
-        // --- End Custom Num Results Logic ---
+        // Number of results is now controlled entirely by the right sidebar setting
+        // No more extraction from user prompt
 
         // Validation: Prompt required for SMS, optional for Email if settings have content
         const hasEmailContentInSettings = mode === 'email' && (settings.subject || settings.message);
@@ -458,6 +532,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             showApiKeyModal();
             return;
         }
+
+        // Record this request for rate limiting
+        recordRequest();
+        
+        // Update rate limit status
+        updateRateLimitStatus();
 
         // --- Hide History Button if Visible ---
         const historyButton = mode === 'sms' ? getSmsMessageHistoryButton() : getEmailMessageHistoryButton();
@@ -520,8 +600,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // --- End Request Summary Message ---
 
 
-        let apiResultOk = false; // Track API call success for finally block
-        let apiData = null; // To store successful API response data for finally block
+        let apiResultOk = false;
+        let apiData = null;
+
         try {
             // Log the final settings being sent
             console.log("Sending settings to backend:", settings);
@@ -529,7 +610,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { ok, data, error } = await generateContent({
                 apiKey,
                 userPrompt: prompt,
-                settings, // Use the potentially modified settings object
+                settings, // Use the settings with num_results from sidebar
                 marketingData,
                 smsData,
                 sessionId // Ensure sessionId is sent for WebSocket streaming
@@ -538,46 +619,64 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Remove the "Generating..." message - ONLY if it was created
             thinkingMessage?.remove(); // Safe to call even if null
 
-            apiResultOk = ok; // Store result status
+            apiResultOk = ok;
             if (ok) {
-                apiData = data; // Store data only if successful
+                apiData = data;
+                
+                // For email mode, display the result with character count
+                if (mode === 'email') {
+                    const resultWithCount = `${data} <sup style="font-size:0.8em;color:#888;">${data.length} chars</sup>`;
+                    addMessageToChat('ai', resultWithCount, false, { asHtml: true });
+                    
+                    // Remove request summary messages when email generation is complete
+                    const targetChatDisplay = getEmailChatDisplay();
+                    if (targetChatDisplay) {
+                        removeRequestSummaryMessages(targetChatDisplay);
+                    }
+                }
+                // For SMS mode, results are handled via WebSocket
             } else {
-                // Handle specific errors like 401/403 if needed (similar to old code)
+                // Handle specific errors like 401/403 if needed
                 if (error?.includes('401') || error?.includes('Unauthorized')) {
-                     addMessageToChat('ai', `Error: Invalid or unauthorized API Key. Please refresh or re-enter.`);
-                     localStorage.removeItem(LOCALSTORAGE_API_KEY_NAME);
-                     showApiKeyModal();
+                    addMessageToChat('ai', `Error: Invalid or unauthorized API Key. Please refresh or re-enter.`);
+                    localStorage.removeItem(LOCALSTORAGE_API_KEY_NAME);
+                    showApiKeyModal();
                 } else if (error?.includes('403') || error?.includes('Forbidden')) {
-                     addMessageToChat('ai', `Error: Access Denied. Ensure you are using an allowed connection.`);
+                    addMessageToChat('ai', `Error: Access Denied. Ensure you are using an allowed connection.`);
+                } else if (error?.includes('Rate limit exceeded')) {
+                    // Handle rate limit from backend
+                    const waitTimeMatch = error.match(/wait (\d+) seconds/);
+                    const waitTime = waitTimeMatch ? parseInt(waitTimeMatch[1]) : 120;
+                    showRateLimitWarning(waitTime);
                 } else {
                     addMessageToChat('ai', `Error: ${error || 'Unknown error during generation.'}`);
                 }
                 return;
             }
-// Only display REST response for email mode or legacy fallback
-if (mode === 'email') {
-    addMessageToChat('ai', data);
-}
-// For SMS mode, do NOT display the REST response; results are streamed via WebSocket
 
         } catch (err) {
             thinkingMessage?.remove(); // Ensure spinner removed on network error too - safe if null
             console.error('Error calling generateContent:', err);
-            addMessageToChat('ai', `Error: Network error or issue sending request. (${err.message || err})`);
+            
+            // Check if it's a rate limit error from the network response
+            if (err.message?.includes('429') || err.message?.includes('Rate limit')) {
+                showRateLimitWarning(120); // Default 2 minute wait
+            } else {
+                addMessageToChat('ai', `Error: Network error or issue sending request. (${err.message || err})`);
+            }
         } finally {
-            // Update summary status for non-streaming (email) mode
-            if (mode !== 'sms' && summaryMessageElement) {
+            // Update summary status
+            if (summaryMessageElement) {
                 let resultsCount = null;
                 if (apiResultOk && apiData) {
                     if (Array.isArray(apiData)) {
                         resultsCount = apiData.length;
                     } else if (typeof apiData === 'object' && apiData !== null) {
-                        resultsCount = 1; // Assume single object is one result
+                        resultsCount = 1;
                     }
                 }
                 updateChatMessageStatus(summaryMessageElement, resultsCount, !apiResultOk);
             }
-            // Note: For SMS mode, status is updated via WebSocket 'done' or 'error' message
 
             // Re-enable button and restore icon
             sendButtonElement.disabled = false;
@@ -594,6 +693,7 @@ if (mode === 'email') {
                 autoResizeTextarea(input);
                 saveStateToLocalStorage(); // Save input changes
             });
+            
             // Ctrl+Enter sends
             input.addEventListener('keydown', (event) => {
                 // Send on Enter (but not Shift+Enter for newlines)
@@ -618,7 +718,7 @@ if (mode === 'email') {
     const clearSettingsButton = document.getElementById('clear-settings-button');
     const clearFilesButton = document.getElementById('clear-files-button-left');
 
-    if (clearProjectButton) clearProjectButton.addEventListener('click', () => { clearProject(); saveStateToLocalStorage(); updateDynamicHeader(); });
+    if (clearProjectButton) clearProjectButton.addEventListener('click', () => { clearProject(); saveStateToLocalStorage(); });
     if (clearSmsHistoryButton) clearSmsHistoryButton.addEventListener('click', () => {
         clearHistory('sms'); // Clears display
         clearMessageHistoryCache('sms'); // Clears cache
@@ -706,9 +806,33 @@ if (mode === 'email') {
      if (projectSelect) {
          projectSelect.addEventListener('change', () => {
              saveStateToLocalStorage();
-             updateDynamicHeader(); // Update header on project change
          });
      }
+
+    // Add event listener for template URL copy button
+    const copyTemplateBtn = document.querySelector('.copy-template-btn');
+    if (copyTemplateBtn) {
+        copyTemplateBtn.addEventListener('click', function() {
+            const templateUrl = '>>> https://vbs.com/xxxxx';
+            navigator.clipboard.writeText(templateUrl).then(() => {
+                const originalIcon = this.innerHTML;
+                this.innerHTML = getCheckIconSVG();
+                this.classList.add('copied');
+                this.disabled = true;
+                this.title = 'Copied!';
+                setTimeout(() => {
+                    this.innerHTML = originalIcon;
+                    this.classList.remove('copied');
+                    this.disabled = false;
+                    this.title = 'Copy template URL';
+                }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy template URL: ', err);
+                this.title = 'Copy failed!';
+                setTimeout(() => { this.title = 'Copy template URL'; }, 2000);
+            });
+        });
+    }
 
     console.log("App initialized.");
 });

@@ -8,6 +8,7 @@ let getCurrentMode = () => 'sms'; // Default function
 let getSmsChatDisplay = () => null;
 let getEmailChatDisplay = () => null;
 let getCopyIconSVG = () => '';
+let getCheckIconSVG = () => '';
 let saveState = () => {}; // Renamed for clarity
 let getProjectSelect = () => null; // Need project select for download filename
 let getSmsMessageHistoryButton = () => null; // Add getter for the new button
@@ -52,6 +53,7 @@ export function configureChat(config) {
     getSmsChatDisplay = config.getSmsChatDisplay || getSmsChatDisplay;
     getEmailChatDisplay = config.getEmailChatDisplay || getEmailChatDisplay;
     getCopyIconSVG = config.getCopyIconSVG || getCopyIconSVG;
+    getCheckIconSVG = config.getCheckIconSVG || getCheckIconSVG;
     saveState = config.saveState || saveState;
     getProjectSelect = config.getProjectSelect || getProjectSelect; // Store project select getter
     getSmsMessageHistoryButton = config.getSmsMessageHistoryButton || getSmsMessageHistoryButton; // Assign new getter
@@ -72,8 +74,37 @@ export function addWelcomeMessage(displayElement, mode) {
     const welcomeDiv = document.createElement('div');
     welcomeDiv.classList.add('message', 'ai', 'alert', 'alert-info');
     welcomeDiv.setAttribute('role', 'alert');
-    welcomeDiv.textContent = `Welcome to ${mode === 'sms' ? 'SMS' : 'Email'} mode! Select a project and type your request below, or use the settings on the right.`;
+    welcomeDiv.style.fontSize = 'var(--font-size-sm)';
+    welcomeDiv.innerHTML = `<i>Welcome to ${mode === 'sms' ? 'SMS' : 'Email'} mode! Select a project and type your request below, or use the settings on the right.</i>`;
     displayElement.appendChild(welcomeDiv);
+}
+
+/**
+ * Removes welcome messages from the specified chat display.
+ * @param {HTMLElement} displayElement - The chat display element to remove welcome messages from.
+ */
+export function removeWelcomeMessage(displayElement) {
+    if (!displayElement) return;
+    
+    // Find and remove welcome messages (they have classes: message, ai, alert, alert-info)
+    const welcomeMessages = displayElement.querySelectorAll('.message.ai.alert.alert-info');
+    welcomeMessages.forEach(msg => {
+        msg.remove();
+    });
+}
+
+/**
+ * Removes request summary messages from the specified chat display.
+ * @param {HTMLElement} displayElement - The chat display element to remove request summary messages from.
+ */
+export function removeRequestSummaryMessages(displayElement) {
+    if (!displayElement) return;
+    
+    // Find and remove request summary messages (they have classes: message, request-summary, request-summary-message, status-completed)
+    const summaryMessages = displayElement.querySelectorAll('.message.request-summary, .request-summary-message, .status-completed');
+    summaryMessages.forEach(msg => {
+        msg.remove();
+    });
 }
 
 /**
@@ -104,6 +135,11 @@ export function addMessageToChat(sender, content, returnElement = false, options
         console.error(`addMessageToChat failed: chatDisplay element for mode '${mode}' not found!`);
         alert("Critical Error: Chat display area is missing. Please reload the page.");
         return undefined; // Return undefined if display not found
+    }
+
+    // Remove welcome message when user sends their first message
+    if (sender === 'user') {
+        removeWelcomeMessage(targetChatDisplay);
     }
     // --- Timestamp Generation ---
     const timestampSpan = document.createElement('span');
@@ -176,10 +212,35 @@ export function addMessageToChat(sender, content, returnElement = false, options
             rawTextForCopy = text;
         }
 
-        messageDiv.innerHTML = displayContentHTML; // Set potentially complex HTML
-        messageDiv.dataset.rawText = rawTextForCopy; // Store original structure for copy
+        // Extract character count elements to place outside the code block
+        let characterCountHTML = '';
+        let contentWithoutCharCount = displayContentHTML;
+        
+        // Check for SMS character count (div with sms-char-count class)
+        const smsCharCountMatch = displayContentHTML.match(/<div class="sms-char-count"[^>]*>.*?<\/div>/);
+        if (smsCharCountMatch) {
+            characterCountHTML = smsCharCountMatch[0];
+            contentWithoutCharCount = displayContentHTML.replace(smsCharCountMatch[0], '');
+        }
+        
+        // Check for email character count (sup element with style)
+        const emailCharCountMatch = displayContentHTML.match(/<sup style="[^"]*">[^<]*chars[^<]*<\/sup>/);
+        if (emailCharCountMatch) {
+            characterCountHTML = emailCharCountMatch[0];
+            contentWithoutCharCount = displayContentHTML.replace(emailCharCountMatch[0], '');
+        }
+        
+        // Wrap main content in styled container, keep character count outside
+        const wrappedContent = `<div class="ai-message-content">${contentWithoutCharCount}</div>${characterCountHTML}`;
+        messageDiv.innerHTML = wrappedContent; // Set potentially complex HTML
+        // Store the appropriate text for copying (message only for SMS, full text for others)
+        if (options.messageOnly) {
+            messageDiv.dataset.rawText = options.messageOnly; // Store just the message for SMS
+        } else {
+            messageDiv.dataset.rawText = rawTextForCopy; // Store original structure for copy
+        }
 
-        // Add copy button
+        // Add single copy button
         const copyButton = document.createElement('button');
         copyButton.type = 'button';
         copyButton.classList.add('btn', 'btn-sm', 'copy-msg-btn');
@@ -257,7 +318,7 @@ function handleCopyMessageClick(event) {
     const textToCopy = messageDiv.dataset.rawText;
 
     navigator.clipboard.writeText(textToCopy).then(() => {
-        copyButton.innerHTML = checkIconSVG; // Use checkmark SVG
+        copyButton.innerHTML = getCheckIconSVG(); // Use checkmark SVG
         copyButton.classList.add('copied');
         copyButton.disabled = true;
         copyButton.title = 'Copied!';
